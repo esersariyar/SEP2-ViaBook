@@ -1,0 +1,15 @@
+# Project specific ignores
+Document/
+
+# IDE files
+.idea/
+
+# Build artifacts
+*.class
+*.jar
+out/
+target/
+
+# OS specific files
+.DS_Store
+Thumbs.db 
