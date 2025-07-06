@@ -1,3 +1,7 @@
+package dao;
+
+import database.DatabaseConnector;
+import model.Appointment;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

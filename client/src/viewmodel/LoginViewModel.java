@@ -1,21 +1,24 @@
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import model.User;
 
 public class LoginViewModel {
     private LoginModel model;
-    private StringProperty username;
+    private StringProperty email;
     private StringProperty password;
     private StringProperty errorMessage;
+    private RMIClient rmiClient;
     
     public LoginViewModel() {
         this.model = new LoginModel();
-        this.username = new SimpleStringProperty("");
+        this.email = new SimpleStringProperty("");
         this.password = new SimpleStringProperty("");
         this.errorMessage = new SimpleStringProperty("");
+        this.rmiClient = new RMIClient();
     }
     
-    public StringProperty usernameProperty() {
-        return username;
+    public StringProperty emailProperty() {
+        return email;
     }
     
     public StringProperty passwordProperty() {
@@ -27,28 +30,44 @@ public class LoginViewModel {
     }
     
     public boolean handleLogin() {
-        String user = username.get();
+        String mail = email.get();
         String pass = password.get();
         
-        model.setUsername(user);
+        model.setEmail(mail);
         model.setPassword(pass);
         
         if (!model.isValid()) {
-            errorMessage.set("Username and password cannot be empty");
+            errorMessage.set("Email and password cannot be empty");
             return false;
         }
-        
         errorMessage.set("");
-        
-        System.out.println("Login attempt:");
-        System.out.println("Username: " + user);
-        System.out.println("Password: " + "*".repeat(pass.length()));
-        
-        return true;
+        if (!rmiClient.isServerConnected()) {
+            errorMessage.set("Cannot connect to ViaBook server");
+            rmiClient.reconnect();
+            if (!rmiClient.isServerConnected()) {
+                errorMessage.set("Server connection failed. Please check if server is running.");
+                return false;
+            }
+        }
+        try {
+            User authenticatedUser = rmiClient.authenticateUser(mail, pass);
+            if (authenticatedUser != null) {
+                System.out.println("ViaBook Client: Login successful for user: " + authenticatedUser.getEmail());
+                System.out.println("ViaBook Client: User role: " + authenticatedUser.getRole());
+                return true;
+            } else {
+                errorMessage.set("Invalid email or password");
+                return false;
+            }
+        } catch (Exception e) {
+            errorMessage.set("Login failed: " + e.getMessage());
+            System.err.println("ViaBook Client: Login error: " + e.getMessage());
+            return false;
+        }
     }
     
     public void clearFields() {
-        username.set("");
+        email.set("");
         password.set("");
         errorMessage.set("");
     }

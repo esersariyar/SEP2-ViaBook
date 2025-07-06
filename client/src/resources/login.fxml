@@ -10,8 +10,8 @@
    </padding>
    <children>
       <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Login" />
-      <Label text="Username:" />
-      <TextField fx:id="usernameField" maxWidth="250.0" promptText="Enter username" />
+      <Label text="Email:" />
+      <TextField fx:id="emailField" maxWidth="250.0" promptText="Enter email" />
       <Label text="Password:" />
       <PasswordField fx:id="passwordField" maxWidth="250.0" promptText="Enter password" />
       <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 12px;" />

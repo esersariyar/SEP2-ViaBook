@@ -1,3 +1,7 @@
+package service;
+
+import dao.AppointmentDAO;
+import model.Appointment;
 import java.time.LocalDateTime;
 import java.util.List;
 

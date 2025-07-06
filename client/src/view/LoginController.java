@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
     
-    @FXML private TextField usernameField;
+    @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     @FXML private Button loginButton;
     @FXML private Label errorLabel;
@@ -26,7 +26,7 @@ public class LoginController implements Initializable {
     }
     
     private void setupBindings() {
-        usernameField.textProperty().bindBidirectional(viewModel.usernameProperty());
+        emailField.textProperty().bindBidirectional(viewModel.emailProperty());
         passwordField.textProperty().bindBidirectional(viewModel.passwordProperty());
         errorLabel.textProperty().bind(viewModel.errorMessageProperty());
     }
@@ -40,7 +40,7 @@ public class LoginController implements Initializable {
         boolean success = viewModel.handleLogin();
         
         if (success) {
-            showSuccessDialog("Welcome to ViaBook, " + viewModel.usernameProperty().get() + "!");
+            showSuccessDialog("Welcome to ViaBook, " + viewModel.emailProperty().get() + "!");
             viewModel.clearFields();
         }
     }

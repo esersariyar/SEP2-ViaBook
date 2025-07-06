@@ -1,3 +1,7 @@
+package dao;
+
+import database.DatabaseConnector;
+import model.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,23 +13,23 @@ public class UserDAO {
         this.dbConnector = new DatabaseConnector();
     }
     
-    public User validateLogin(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    public User validateLogin(String email, String password) {
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
         
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, username);
+            stmt.setString(1, email);
             stmt.setString(2, password);
             
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 User user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
+                user.setId(rs.getInt("id"));
                 user.setPassword(rs.getString("password"));
                 user.setEmail(rs.getString("email"));
                 user.setRole(rs.getString("role"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
                 return user;
             }
         } catch (SQLException e) {
@@ -36,15 +40,14 @@ public class UserDAO {
     }
     
     public boolean createUser(User user) {
-        String sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (password, email, role) VALUES (?, ?, ?)";
         
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getEmail());
-            stmt.setString(4, user.getRole());
+            stmt.setString(1, user.getPassword());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getRole());
             
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -52,6 +55,8 @@ public class UserDAO {
             return false;
         }
     }
+    
+
     
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
@@ -63,11 +68,11 @@ public class UserDAO {
             
             while (rs.next()) {
                 User user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
+                user.setId(rs.getInt("id"));
                 user.setPassword(rs.getString("password"));
                 user.setEmail(rs.getString("email"));
                 user.setRole(rs.getString("role"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
                 users.add(user);
             }
         } catch (SQLException e) {
