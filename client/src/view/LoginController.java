@@ -1,10 +1,13 @@
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -40,16 +43,23 @@ public class LoginController implements Initializable {
         boolean success = viewModel.handleLogin();
         
         if (success) {
-            showSuccessDialog("Welcome to ViaBook, " + viewModel.emailProperty().get() + "!");
             viewModel.clearFields();
+            openPatientDashboard();
         }
     }
     
-    private void showSuccessDialog(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("ViaBook - Login Successful");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void openPatientDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("patient_dashboard.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Patient Dashboard");
+            stage.setScene(new Scene(root));
+            stage.show();
+            Stage currentStage = (Stage) loginButton.getScene().getWindow();
+            currentStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 } 
