@@ -28,6 +28,8 @@ public class UserDAO {
                 user.setId(rs.getInt("id"));
                 user.setPassword(rs.getString("password"));
                 user.setEmail(rs.getString("email"));
+                user.setFirstName(rs.getString("first_name"));
+                user.setLastName(rs.getString("last_name"));
                 user.setRole(rs.getString("role"));
                 user.setCreatedAt(rs.getTimestamp("created_at"));
                 return user;
@@ -40,14 +42,16 @@ public class UserDAO {
     }
     
     public boolean createUser(User user) {
-        String sql = "INSERT INTO users (password, email, role) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (password, email, first_name, last_name, role) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, user.getPassword());
             stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getRole());
+            stmt.setString(3, user.getFirstName());
+            stmt.setString(4, user.getLastName());
+            stmt.setString(5, user.getRole());
             
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -71,6 +75,8 @@ public class UserDAO {
                 user.setId(rs.getInt("id"));
                 user.setPassword(rs.getString("password"));
                 user.setEmail(rs.getString("email"));
+                user.setFirstName(rs.getString("first_name"));
+                user.setLastName(rs.getString("last_name"));
                 user.setRole(rs.getString("role"));
                 user.setCreatedAt(rs.getTimestamp("created_at"));
                 users.add(user);

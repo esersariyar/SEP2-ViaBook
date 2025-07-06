@@ -36,14 +36,14 @@ public class RMIClient {
         }
     }
     
-    public boolean registerUser(String password, String email, String role) {
+    public boolean registerUser(String password, String email, String firstName, String lastName, String role) {
         if (userService == null) {
             System.err.println("ViaBook Client: No server connection available");
             return false;
         }
         
         try {
-            return userService.registerUser(password, email, role);
+            return userService.registerUser(password, email, firstName, lastName, role);
         } catch (RemoteException e) {
             System.err.println("ViaBook Client: Registration failed: " + e.getMessage());
             return false;

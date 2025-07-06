@@ -36,6 +36,8 @@ public class DatabaseConnector {
                         id SERIAL PRIMARY KEY,
                         email VARCHAR(100) NOT NULL UNIQUE,
                         password VARCHAR(255) NOT NULL,
+                        first_name VARCHAR(100),
+                        last_name VARCHAR(100),
                         role VARCHAR(20) NOT NULL CHECK (role IN ('patient', 'dentist', 'secretary')),
                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                     )
@@ -47,7 +49,7 @@ public class DatabaseConnector {
                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'test@test.com'");
                 rs.next();
                 if (rs.getInt(1) == 0) {
-                    stmt.executeUpdate("INSERT INTO users (email, password, role) VALUES ('test@test.com', 'test', 'patient')");
+                    stmt.executeUpdate("INSERT INTO users (email, password, first_name, last_name, role) VALUES ('test@test.com', 'test', 'Test', 'User', 'patient')");
                     System.out.println("Default test user inserted");
                 }
             }

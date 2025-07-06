@@ -34,10 +34,10 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
     }
     
     @Override
-    public boolean registerUser(String password, String email, String role) throws RemoteException {
+    public boolean registerUser(String password, String email, String firstName, String lastName, String role) throws RemoteException {
         try {
             System.out.println("ViaBook Server: Registration attempt for email: " + email);
-            return userService.registerUser(password, email, role);
+            return userService.registerUser(password, email, firstName, lastName, role);
         } catch (Exception e) {
             System.err.println("ViaBook Server: Registration error: " + e.getMessage());
             throw new RemoteException("Registration failed", e);

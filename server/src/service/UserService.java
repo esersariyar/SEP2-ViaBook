@@ -20,13 +20,13 @@ public class UserService {
         return userDAO.validateLogin(email, password);
     }
     
-    public boolean registerUser(String password, String email, String role) {
-        if (password == null || email == null || role == null ||
-            password.trim().isEmpty() || email.trim().isEmpty() || role.trim().isEmpty()) {
+    public boolean registerUser(String password, String email, String firstName, String lastName, String role) {
+        if (password == null || email == null || firstName == null || lastName == null || role == null ||
+            password.trim().isEmpty() || email.trim().isEmpty() || firstName.trim().isEmpty() || lastName.trim().isEmpty() || role.trim().isEmpty()) {
             return false;
         }
         
-        User newUser = new User(password, email, role);
+        User newUser = new User(password, email, firstName, lastName, role);
         return userDAO.createUser(newUser);
     }
     
