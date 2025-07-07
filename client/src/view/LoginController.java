@@ -3,11 +3,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import model.User;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -43,17 +41,32 @@ public class LoginController implements Initializable {
         boolean success = viewModel.handleLogin();
         
         if (success) {
+            User user = viewModel.getAuthenticatedUser();
             viewModel.clearFields();
-            openPatientDashboard();
+            if (user != null) {
+                if ("patient".equalsIgnoreCase(user.getRole())) {
+                    openDashboard("patient_dashboard.fxml", "Patient Dashboard");
+                } else if ("dentist".equalsIgnoreCase(user.getRole())) {
+                    openDashboard("dentist_dashboard.fxml", "Dentist Dashboard");
+                } else if ("secretary".equalsIgnoreCase(user.getRole())) {
+                    openDashboard("secretary_dashboard.fxml", "Secretary Dashboard");
+                } else {
+                   Alert alert = new Alert(Alert.AlertType.ERROR);
+                   alert.setTitle("Error");
+                   alert.setHeaderText(null);
+                   alert.setContentText("Invalid user role");
+                   alert.showAndWait();
+                }
+            }
         }
     }
     
-    private void openPatientDashboard() {
+    private void openDashboard(String fxml, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("patient_dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(fxml));
             Parent root = loader.load();
             Stage stage = new Stage();
-            stage.setTitle("Patient Dashboard");
+            stage.setTitle(title);
             stage.setScene(new Scene(root));
             stage.show();
             Stage currentStage = (Stage) loginButton.getScene().getWindow();

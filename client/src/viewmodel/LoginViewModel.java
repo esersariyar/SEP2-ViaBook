@@ -8,6 +8,7 @@ public class LoginViewModel {
     private StringProperty password;
     private StringProperty errorMessage;
     private RMIClient rmiClient;
+    private User authenticatedUser;
     
     public LoginViewModel() {
         this.model = new LoginModel();
@@ -15,6 +16,7 @@ public class LoginViewModel {
         this.password = new SimpleStringProperty("");
         this.errorMessage = new SimpleStringProperty("");
         this.rmiClient = new RMIClient();
+        this.authenticatedUser = null;
     }
     
     public StringProperty emailProperty() {
@@ -50,7 +52,7 @@ public class LoginViewModel {
             }
         }
         try {
-            User authenticatedUser = rmiClient.authenticateUser(mail, pass);
+            authenticatedUser = rmiClient.authenticateUser(mail, pass);
             if (authenticatedUser != null) {
                 System.out.println("ViaBook Client: Login successful for user: " + authenticatedUser.getEmail());
                 System.out.println("ViaBook Client: User role: " + authenticatedUser.getRole());
@@ -64,6 +66,10 @@ public class LoginViewModel {
             System.err.println("ViaBook Client: Login error: " + e.getMessage());
             return false;
         }
+    }
+    
+    public User getAuthenticatedUser() {
+        return authenticatedUser;
     }
     
     public void clearFields() {
