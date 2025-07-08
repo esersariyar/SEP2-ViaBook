@@ -3,12 +3,12 @@ package view;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-public class SecretaryDashboardController {
+public class SecretaryDashboardController extends BaseDashboardController {
     @FXML
     private Button logoutButton;
 
     @FXML
     private void handleLogout() {
-        System.out.println("Logout clicked");
+        logout(logoutButton);
     }
 } 

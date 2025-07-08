@@ -14,6 +14,8 @@ public class Main extends Application {
         
         primaryStage.setTitle("ViaBook");
         primaryStage.setScene(scene);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(600);
         primaryStage.setResizable(true);
         primaryStage.show();
     }

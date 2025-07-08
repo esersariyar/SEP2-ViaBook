@@ -3,17 +3,21 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="LoginController" alignment="CENTER" spacing="18" styleClass="anchor-pane" fillWidth="true">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="LoginController">
     <children>
-        <ImageView fitWidth="120" preserveRatio="true" pickOnBounds="true">
-            <image>
-                <Image url="@viabook-logo.png" />
-            </image>
-        </ImageView>
-        <Label text="ViaBook Login" style="-fx-font-size: 24px;" />
-        <TextField fx:id="emailField" promptText="Email" maxWidth="260" />
-        <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
-        <Button fx:id="loginButton" text="Login" minWidth="120" onAction="#handleLogin" />
-        <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 14px;" wrapText="true" minHeight="24" maxWidth="350" alignment="CENTER" visible="true" managed="true" />
+        <VBox alignment="CENTER" spacing="18" styleClass="anchor-pane" fillWidth="true" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" maxWidth="400" layoutX="0" layoutY="0">
+            <children>
+                <ImageView fitWidth="120" preserveRatio="true" pickOnBounds="true">
+                    <image>
+                        <Image url="@viabook-logo.png" />
+                    </image>
+                </ImageView>
+                <Label text="ViaBook Login" style="-fx-font-size: 24px;" />
+                <TextField fx:id="emailField" promptText="Email" maxWidth="260" />
+                <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
+                <Button fx:id="loginButton" text="Login" minWidth="120" onAction="#handleLogin" />
+                <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 14px;" wrapText="true" minHeight="24" maxWidth="350" alignment="CENTER" visible="true" managed="true" />
+            </children>
+        </VBox>
     </children>
-</VBox> 
+</AnchorPane> 

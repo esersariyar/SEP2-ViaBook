@@ -9,7 +9,6 @@ public class Main {
         try {
             System.out.println("ViaBook Server starting...");
             
-            // Sadece initializeDatabase çağrılıyor
             DatabaseConnector dbConnector = new DatabaseConnector();
             dbConnector.initializeDatabase();
             

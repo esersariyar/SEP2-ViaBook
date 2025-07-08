@@ -4,7 +4,7 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml" prefWidth="900" prefHeight="600" fx:controller="view.DentistDashboardController">
     <children>
         <Label text="Dentist Dashboard" style="-fx-font-size: 24px;" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20" />
-        <Button text="Logout" fx:id="logoutButton" AnchorPane.topAnchor="20" AnchorPane.rightAnchor="20" />
+        <Button text="Logout" fx:id="logoutButton" AnchorPane.topAnchor="20" AnchorPane.rightAnchor="20" onAction="#handleLogout" />
         <ScrollPane fitToWidth="true" fitToHeight="true" AnchorPane.topAnchor="70" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
             <content>
                 <HBox spacing="32" alignment="TOP_CENTER" style="-fx-padding: 24;">
