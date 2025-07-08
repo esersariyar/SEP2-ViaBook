@@ -9,11 +9,12 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("resources/login.fxml"));
-        Scene scene = new Scene(root, 350, 280);
+        Scene scene = new Scene(root, 500, 400);
+        scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
         
         primaryStage.setTitle("ViaBook");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         primaryStage.show();
     }
     

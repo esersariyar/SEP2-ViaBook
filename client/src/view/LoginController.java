@@ -24,6 +24,7 @@ public class LoginController implements Initializable {
         viewModel = new LoginViewModel();
         setupBindings();
         setupEventHandlers();
+        errorLabel.setVisible(true);
     }
     
     private void setupBindings() {
@@ -38,6 +39,8 @@ public class LoginController implements Initializable {
     
     @FXML
     private void handleLogin() {
+        System.out.println("ErrorLabel: " + errorLabel.getText());
+        System.out.println("ErrorMessage: " + viewModel.errorMessageProperty().get());
         boolean success = viewModel.handleLogin();
         
         if (success) {
@@ -65,9 +68,11 @@ public class LoginController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(fxml));
             Parent root = loader.load();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
             Stage stage = new Stage();
             stage.setTitle(title);
-            stage.setScene(new Scene(root));
+            stage.setScene(scene);
             stage.show();
             Stage currentStage = (Stage) loginButton.getScene().getWindow();
             currentStage.close();

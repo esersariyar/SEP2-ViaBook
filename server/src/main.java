@@ -9,9 +9,9 @@ public class Main {
         try {
             System.out.println("ViaBook Server starting...");
             
-            // Test database connection
+            // Sadece initializeDatabase çağrılıyor
             DatabaseConnector dbConnector = new DatabaseConnector();
-            dbConnector.testConnection();
+            dbConnector.initializeDatabase();
             
             // Start RMI registry
             LocateRegistry.createRegistry(1099);

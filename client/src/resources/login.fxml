@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
-
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginController">
-   <padding>
-      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-   </padding>
-   <children>
-      <Label style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Login" />
-      <Label text="Email:" />
-      <TextField fx:id="emailField" maxWidth="250.0" promptText="Enter email" />
-      <Label text="Password:" />
-      <PasswordField fx:id="passwordField" maxWidth="250.0" promptText="Enter password" />
-      <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 12px;" />
-      <Button fx:id="loginButton" minWidth="100.0" onAction="#handleLogin" text="Login" />
-   </children>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="LoginController" alignment="CENTER" spacing="18" styleClass="anchor-pane" fillWidth="true">
+    <children>
+        <ImageView fitWidth="120" preserveRatio="true" pickOnBounds="true">
+            <image>
+                <Image url="@viabook-logo.png" />
+            </image>
+        </ImageView>
+        <Label text="ViaBook Login" style="-fx-font-size: 24px;" />
+        <TextField fx:id="emailField" promptText="Email" maxWidth="260" />
+        <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
+        <Button fx:id="loginButton" text="Login" minWidth="120" onAction="#handleLogin" />
+        <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 14px;" wrapText="true" minHeight="24" maxWidth="350" alignment="CENTER" visible="true" managed="true" />
+    </children>
 </VBox> 

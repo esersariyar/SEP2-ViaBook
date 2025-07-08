@@ -1,0 +1,37 @@
+.root, .anchor-pane, AnchorPane {
+    -fx-background-color: #f4f6fa;
+}
+
+.label {
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+.label[style*='24px'] {
+    -fx-text-fill: #2a3b4c;
+    -fx-font-weight: bold;
+}
+
+.label[style*='16px'] {
+    -fx-text-fill: #3a4a5c;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-background-radius: 6px;
+    -fx-font-size: 14px;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    -fx-cursor: hand;
+}
+.button:hover {
+    -fx-background-color: #357ab8;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #e3eaf2;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-size: 32px;
+    -fx-border-color: transparent transparent #d1dbe6 transparent;
+    -fx-border-width: 0 0 1 0;
+} 
