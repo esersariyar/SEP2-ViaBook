@@ -68,6 +68,22 @@ public class LoginController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(fxml));
             Parent root = loader.load();
+            if ("patient_dashboard.fxml".equals(fxml)) {
+                Object controller = loader.getController();
+                if (controller instanceof view.PatientDashboardController) {
+                    ((view.PatientDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
+                }
+            } else if ("dentist_dashboard.fxml".equals(fxml)) {
+                Object controller = loader.getController();
+                if (controller instanceof view.DentistDashboardController) {
+                    ((view.DentistDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
+                }
+            } else if ("secretary_dashboard.fxml".equals(fxml)) {
+                Object controller = loader.getController();
+                if (controller instanceof view.SecretaryDashboardController) {
+                    ((view.SecretaryDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
+                }
+            }
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
             Stage stage = new Stage();

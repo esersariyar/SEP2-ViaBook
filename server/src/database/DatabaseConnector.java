@@ -30,21 +30,76 @@ public class DatabaseConnector {
                 }
                 viabookConn = DriverManager.getConnection(BASE_URL + DATABASE_NAME, USERNAME, PASSWORD);
             }
+            
             try (Statement stmt = viabookConn.createStatement()) {
                 stmt.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
-                        email VARCHAR(100) NOT NULL UNIQUE,
-                        password VARCHAR(255) NOT NULL,
-                        first_name VARCHAR(100),
-                        last_name VARCHAR(100),
-                        role VARCHAR(20) NOT NULL CHECK (role IN ('patient', 'dentist', 'secretary')),
+                        email VARCHAR(255) NOT NULL UNIQUE,
+                        password TEXT NOT NULL,
+                        role VARCHAR(50) NOT NULL CHECK (role IN ('patient', 'dentist', 'secretary')),
+                        first_name VARCHAR(100) NOT NULL,
+                        last_name VARCHAR(100) NOT NULL,
                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                     )
                 """);
                 System.out.println("users table created (or already exists)");
             }
-            // Insert default test user if not exists
+            
+            try (Statement stmt = viabookConn.createStatement()) {
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS dentist_profiles (
+                        id SERIAL PRIMARY KEY,
+                        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        description TEXT,
+                        specialization VARCHAR(255)
+                    )
+                """);
+                System.out.println("dentist_profiles table created (or already exists)");
+            }
+            
+            try (Statement stmt = viabookConn.createStatement()) {
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS appointments (
+                        id SERIAL PRIMARY KEY,
+                        patient_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        dentist_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        appointment_time TIMESTAMP NOT NULL,
+                        status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'cancelled')),
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                """);
+                System.out.println("appointments table created (or already exists)");
+            }
+            
+            try (Statement stmt = viabookConn.createStatement()) {
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS working_hours (
+                        id SERIAL PRIMARY KEY,
+                        dentist_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        day_of_week VARCHAR(20) NOT NULL CHECK (day_of_week IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')),
+                        start_time TIME NOT NULL,
+                        end_time TIME NOT NULL,
+                        CONSTRAINT working_hours_time_check CHECK (start_time < end_time),
+                        UNIQUE(dentist_id, day_of_week)
+                    )
+                """);
+                System.out.println("working_hours table created (or already exists)");
+            }
+            
+            try (Statement stmt = viabookConn.createStatement()) {
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_dentist_profiles_user_id ON dentist_profiles(user_id)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_appointments_patient_id ON appointments(patient_id)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_appointments_dentist_id ON appointments(dentist_id)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_appointments_time ON appointments(appointment_time)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_working_hours_dentist_id ON working_hours(dentist_id)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_working_hours_day ON working_hours(day_of_week)");
+                System.out.println("Database indexes created (or already exist)");
+            }
+            
             try (Statement stmt = viabookConn.createStatement()) {
                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'test@test.com'");
                 rs.next();
@@ -53,6 +108,7 @@ public class DatabaseConnector {
                     System.out.println("Default test user inserted");
                 }
             }
+            
             viabookConn.close();
             initialized = true;
         } catch (Exception e) {

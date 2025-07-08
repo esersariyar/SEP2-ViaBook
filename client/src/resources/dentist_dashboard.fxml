@@ -12,15 +12,15 @@
                         <Label text="Profile" style="-fx-font-size: 16px;" />
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <Label text="Name:" />
-                            <Label text="[Name]" />
+                            <Label fx:id="nameLabel" text="[Name]" />
                         </HBox>
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <Label text="Surname:" />
-                            <Label text="[Surname]" />
+                            <Label fx:id="surnameLabel" text="[Surname]" />
                         </HBox>
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <Label text="Email:" />
-                            <Label text="[Email]" />
+                            <Label fx:id="emailLabel" text="[Email]" />
                         </HBox>
                     </VBox>
                     <VBox spacing="16" alignment="TOP_CENTER" HBox.hgrow="ALWAYS" maxWidth="600">

@@ -6,10 +6,26 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.control.Label;
+import model.User;
 
 public class DentistDashboardController extends BaseDashboardController {
     @FXML
     private Button logoutButton;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label surnameLabel;
+    @FXML
+    private Label emailLabel;
+
+    public void setUser(User user) {
+        if (user != null) {
+            nameLabel.setText(user.getFirstName());
+            surnameLabel.setText(user.getLastName());
+            emailLabel.setText(user.getEmail());
+        }
+    }
 
     @FXML
     private void handleLogout() {
