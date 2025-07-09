@@ -1,6 +1,8 @@
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import model.User;
+import model.LoginModel;
+import service.RMIClient;
 
 public class LoginViewModel {
     private LoginModel model;

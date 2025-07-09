@@ -1,3 +1,5 @@
+package service;
+
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import rmi.UserServiceInterface;
