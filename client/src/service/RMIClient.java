@@ -4,6 +4,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import rmi.UserServiceInterface;
 import model.User;
+import model.DentistProfile;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -101,6 +102,20 @@ public class RMIClient {
         } catch (RemoteException e) {
             System.err.println("ViaBook Client: Delete failed: " + e.getMessage());
             return false;
+        }
+    }
+    
+    public DentistProfile getDentistProfile(int userId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return null;
+        }
+        
+        try {
+            return userService.getDentistProfile(userId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get dentist profile failed: " + e.getMessage());
+            return null;
         }
     }
     

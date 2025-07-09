@@ -2,6 +2,7 @@ package rmi;
 
 import service.UserService;
 import model.User;
+import model.DentistProfile;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -84,6 +85,16 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
         } catch (Exception e) {
             System.err.println("ViaBook Server: Delete error: " + e.getMessage());
             throw new RemoteException("User delete failed", e);
+        }
+    }
+    
+    @Override
+    public DentistProfile getDentistProfile(int userId) throws RemoteException {
+        try {
+            return userService.getDentistProfile(userId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get dentist profile error: " + e.getMessage());
+            throw new RemoteException("Get dentist profile failed", e);
         }
     }
 } 

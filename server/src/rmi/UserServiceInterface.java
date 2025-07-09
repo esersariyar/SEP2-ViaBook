@@ -1,6 +1,7 @@
 package rmi;
 
 import model.User;
+import model.DentistProfile;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -18,4 +19,6 @@ public interface UserServiceInterface extends Remote {
     List<User> getAllUsers() throws RemoteException;
     
     boolean deleteUser(int userId) throws RemoteException;
+    
+    DentistProfile getDentistProfile(int userId) throws RemoteException;
 } 

@@ -1,14 +1,18 @@
 package service;
 
 import dao.UserDAO;
+import dao.DentistProfileDAO;
 import model.User;
+import model.DentistProfile;
 import java.util.List;
 
 public class UserService {
     private UserDAO userDAO;
+    private DentistProfileDAO dentistProfileDAO;
     
     public UserService() {
         this.userDAO = new UserDAO();
+        this.dentistProfileDAO = new DentistProfileDAO();
     }
     
     public User authenticateUser(String email, String password) {
@@ -49,5 +53,9 @@ public class UserService {
     
     public boolean deleteUser(int userId) {
         return userDAO.deleteUser(userId);
+    }
+    
+    public DentistProfile getDentistProfile(int userId) {
+        return dentistProfileDAO.getProfileByUserId(userId);
     }
 } 
