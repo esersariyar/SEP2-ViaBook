@@ -53,4 +53,15 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
             throw new RemoteException("User validation failed", e);
         }
     }
+    
+    @Override
+    public boolean updateUser(User user) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Update attempt for user: " + user.getEmail());
+            return userService.updateUser(user);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Update error: " + e.getMessage());
+            throw new RemoteException("User update failed", e);
+        }
+    }
 } 

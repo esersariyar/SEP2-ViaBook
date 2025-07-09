@@ -8,7 +8,7 @@
         <ScrollPane fitToWidth="true" fitToHeight="true" AnchorPane.topAnchor="70" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
             <content>
                 <HBox spacing="32" alignment="TOP_CENTER" style="-fx-padding: 24;">
-                    <VBox spacing="16" alignment="TOP_LEFT" minWidth="200" maxWidth="240" HBox.hgrow="NEVER">
+                    <VBox spacing="16" alignment="TOP_LEFT" minWidth="220" maxWidth="260" HBox.hgrow="NEVER">
                         <Label text="Profile" style="-fx-font-size: 16px;" />
                         <HBox spacing="8" alignment="CENTER_LEFT">
                             <Label text="Name:" />
@@ -22,31 +22,96 @@
                             <Label text="Email:" />
                             <Label fx:id="emailLabel" text="[Email]" />
                         </HBox>
-                    </VBox>
-                    <VBox spacing="16" alignment="TOP_CENTER" HBox.hgrow="ALWAYS" maxWidth="600">
-                        <Label text="Working Hours" style="-fx-font-size: 16px;" />
-                        <TableView prefHeight="120" VBox.vgrow="NEVER">
-                            <columns>
-                                <TableColumn text="Day" prefWidth="100" />
-                                <TableColumn text="Start" prefWidth="100" />
-                                <TableColumn text="End" prefWidth="100" />
-                            </columns>
-                        </TableView>
-                        <Label text="Upcoming Appointments" style="-fx-font-size: 16px;" />
-                        <TableView prefHeight="120" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn text="Date" prefWidth="120" />
-                                <TableColumn text="Time" prefWidth="120" />
-                                <TableColumn text="Patient" prefWidth="120" />
-                                <TableColumn text="Status" prefWidth="120" />
-                            </columns>
-                        </TableView>
-                    </VBox>
-                    <VBox spacing="16" alignment="TOP_CENTER" minWidth="180" maxWidth="220" HBox.hgrow="NEVER">
+                        
+                        <Separator />
+                        
                         <Label text="Update Profile" style="-fx-font-size: 16px;" />
-                        <Button text="Update" prefWidth="120" maxWidth="Infinity" />
-                        <Label text="Block/Modify Slots" style="-fx-font-size: 16px;" />
-                        <Button text="Block/Modify" prefWidth="120" maxWidth="Infinity" />
+                        <VBox spacing="8">
+                            <Label text="Specialization:" />
+                            <TextField fx:id="specializationField" prefWidth="180" />
+                            <Label text="Description:" />
+                            <TextArea fx:id="descriptionArea" prefRowCount="3" wrapText="true" />
+                            <Button text="Update Profile" fx:id="updateProfileButton" prefWidth="150" onAction="#handleUpdateProfile" />
+                        </VBox>
+                    </VBox>
+                    
+                    <VBox spacing="16" alignment="TOP_CENTER" HBox.hgrow="ALWAYS" maxWidth="600">
+                        <TabPane prefHeight="500" tabClosingPolicy="UNAVAILABLE">
+                            <Tab text="Working Hours">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <TableView fx:id="workingHoursTable" prefHeight="200">
+                                        <columns>
+                                            <TableColumn text="Day" prefWidth="120" />
+                                            <TableColumn text="Start Time" prefWidth="120" />
+                                            <TableColumn text="End Time" prefWidth="120" />
+                                            <TableColumn text="Actions" prefWidth="100" />
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </Tab>
+                            <Tab text="Define Working Hours">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <HBox spacing="16" alignment="CENTER_LEFT">
+                                        <VBox spacing="8">
+                                            <Label text="Day of Week:" />
+                                            <ComboBox fx:id="dayComboBox" prefWidth="120" />
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="Start Time:" />
+                                            <TextField fx:id="startTimeField" prefWidth="100" promptText="09:00" />
+                                        </VBox>
+                                        <VBox spacing="8">
+                                            <Label text="End Time:" />
+                                            <TextField fx:id="endTimeField" prefWidth="100" promptText="17:00" />
+                                        </VBox>
+                                    </HBox>
+                                    <HBox spacing="8">
+                                        <Button text="Add Working Hours" fx:id="addWorkingHoursButton" prefWidth="150" onAction="#handleAddWorkingHours" />
+                                        <Button text="Update Selected" fx:id="updateWorkingHoursButton" prefWidth="150" onAction="#handleUpdateWorkingHours" />
+                                        <Button text="Delete Selected" fx:id="deleteWorkingHoursButton" prefWidth="150" onAction="#handleDeleteWorkingHours" />
+                                    </HBox>
+                                </VBox>
+                            </Tab>
+                            <Tab text="Upcoming Appointments">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <TableView fx:id="upcomingAppointmentsTable" prefHeight="200">
+                                        <columns>
+                                            <TableColumn text="Date" prefWidth="120" />
+                                            <TableColumn text="Time" prefWidth="120" />
+                                            <TableColumn text="Patient" prefWidth="120" />
+                                            <TableColumn text="Status" prefWidth="120" />
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </Tab>
+                        </TabPane>
+                    </VBox>
+                    
+                    <VBox spacing="16" alignment="TOP_CENTER" minWidth="200" maxWidth="240" HBox.hgrow="NEVER">
+                        <Label text="Slot Management" style="-fx-font-size: 16px;" />
+                        
+                        <VBox spacing="8">
+                            <Label text="Select Date:" />
+                            <DatePicker fx:id="slotDatePicker" prefWidth="180" onAction="#handleSlotDateSelection" />
+                            
+                            <Label text="Available Slots:" />
+                            <ListView fx:id="availableSlotsList" prefHeight="200" onMouseClicked="#handleSlotSelection" />
+                            
+                            <VBox spacing="4">
+                                <Button text="Block Selected Slot" fx:id="blockSlotButton" prefWidth="160" onAction="#handleBlockSlot" />
+                                <Button text="Unblock Selected Slot" fx:id="unblockSlotButton" prefWidth="160" onAction="#handleUnblockSlot" />
+                            </VBox>
+                        </VBox>
+                        
+                        <Separator />
+                        
+                        <VBox spacing="8">
+                            <Label text="Custom Block:" />
+                            <HBox spacing="4">
+                                <TextField fx:id="customBlockTimeField" prefWidth="80" promptText="14:30" />
+                                <Button text="Block" fx:id="customBlockButton" prefWidth="60" onAction="#handleCustomBlock" />
+                            </HBox>
+                        </VBox>
                     </VBox>
                 </HBox>
             </content>

@@ -37,4 +37,13 @@ public class UserService {
     public boolean isValidUser(String email) {
         return email != null && !email.trim().isEmpty();
     }
+    
+    public boolean updateUser(User user) {
+        if (user == null || user.getEmail() == null || user.getFirstName() == null || user.getLastName() == null ||
+            user.getEmail().trim().isEmpty() || user.getFirstName().trim().isEmpty() || user.getLastName().trim().isEmpty()) {
+            return false;
+        }
+        
+        return userDAO.updateUser(user);
+    }
 } 

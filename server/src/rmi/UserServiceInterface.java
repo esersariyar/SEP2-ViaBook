@@ -11,4 +11,6 @@ public interface UserServiceInterface extends Remote {
     boolean registerUser(String password, String email, String firstName, String lastName, String role) throws RemoteException;
     
     boolean isValidUser(String email) throws RemoteException;
+    
+    boolean updateUser(User user) throws RemoteException;
 } 

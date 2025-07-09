@@ -8,35 +8,105 @@
         <ScrollPane fitToWidth="true" fitToHeight="true" AnchorPane.topAnchor="70" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
             <content>
                 <HBox spacing="32" alignment="TOP_CENTER" style="-fx-padding: 24;" >
-                    <VBox spacing="16" alignment="TOP_LEFT" minWidth="180" maxWidth="220" HBox.hgrow="NEVER">
-                        <Label text="Profile" style="-fx-font-size: 16px;" />
-                        <HBox spacing="8" alignment="CENTER_LEFT">
-                            <Label text="Name:" />
-                            <Label fx:id="nameLabel" text="[Name]" />
-                        </HBox>
-                        <HBox spacing="8" alignment="CENTER_LEFT">
-                            <Label text="Surname:" />
-                            <Label fx:id="surnameLabel" text="[Surname]" />
-                        </HBox>
-                        <HBox spacing="8" alignment="CENTER_LEFT">
-                            <Label text="Email:" />
-                            <Label fx:id="emailLabel" text="[Email]" />
-                        </HBox>
+                    <VBox spacing="16" alignment="TOP_LEFT" minWidth="220" maxWidth="260" HBox.hgrow="NEVER">
+                        <TabPane prefHeight="400" tabClosingPolicy="UNAVAILABLE">
+                            <Tab text="Profile">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label text="Name:" />
+                                        <Label fx:id="nameLabel" text="[Name]" />
+                                    </HBox>
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label text="Surname:" />
+                                        <Label fx:id="surnameLabel" text="[Surname]" />
+                                    </HBox>
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label text="Email:" />
+                                        <Label fx:id="emailLabel" text="[Email]" />
+                                    </HBox>
+                                </VBox>
+                            </Tab>
+                            <Tab text="Edit Profile">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <Label text="First Name:" />
+                                    <TextField fx:id="firstNameField" prefWidth="180" />
+                                    <Label text="Last Name:" />
+                                    <TextField fx:id="lastNameField" prefWidth="180" />
+                                    <Label text="Email:" />
+                                    <TextField fx:id="emailField" prefWidth="180" />
+                                    <Button text="Update Profile" fx:id="updateProfileButton" prefWidth="120" onAction="#handleUpdateProfile" />
+                                </VBox>
+                            </Tab>
+                        </TabPane>
                     </VBox>
+                    
                     <VBox spacing="16" alignment="TOP_CENTER" HBox.hgrow="ALWAYS" maxWidth="600">
-                        <Label text="Upcoming Appointments" style="-fx-font-size: 16px;" />
-                        <TableView prefHeight="200" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn text="Date" prefWidth="120" />
-                                <TableColumn text="Time" prefWidth="120" />
-                                <TableColumn text="Dentist" prefWidth="120" />
-                                <TableColumn text="Status" prefWidth="120" />
-                            </columns>
-                        </TableView>
+                        <TabPane prefHeight="500" tabClosingPolicy="UNAVAILABLE">
+                            <Tab text="Upcoming Appointments">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <TableView fx:id="upcomingAppointmentsTable" prefHeight="180">
+                                        <columns>
+                                            <TableColumn text="Date" prefWidth="120" />
+                                            <TableColumn text="Time" prefWidth="100" />
+                                            <TableColumn text="Dentist" prefWidth="120" />
+                                            <TableColumn text="Status" prefWidth="100" />
+                                            <TableColumn text="Actions" prefWidth="100" />
+                                        </columns>
+                                    </TableView>
+                                    <Button text="Cancel Selected" fx:id="cancelAppointmentButton" prefWidth="150" onAction="#handleCancelAppointment" />
+                                </VBox>
+                            </Tab>
+                            <Tab text="Past Appointments">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <TableView fx:id="pastAppointmentsTable" prefHeight="200">
+                                        <columns>
+                                            <TableColumn text="Date" prefWidth="120" />
+                                            <TableColumn text="Time" prefWidth="100" />
+                                            <TableColumn text="Dentist" prefWidth="120" />
+                                            <TableColumn text="Status" prefWidth="100" />
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </Tab>
+                        </TabPane>
                     </VBox>
-                    <VBox spacing="16" alignment="TOP_CENTER" minWidth="160" maxWidth="200" HBox.hgrow="NEVER">
-                        <Label text="Book Appointment" style="-fx-font-size: 16px;" />
-                        <Button text="Book" prefWidth="120" maxWidth="Infinity" />
+                    
+                    <VBox spacing="16" alignment="TOP_CENTER" minWidth="220" maxWidth="260" HBox.hgrow="NEVER">
+                        <TabPane prefHeight="500" tabClosingPolicy="UNAVAILABLE">
+                            <Tab text="Book Appointment">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <Label text="Select Dentist:" style="-fx-font-weight: bold;" />
+                                    <ComboBox fx:id="dentistComboBox" prefWidth="180" onAction="#handleDentistSelection" />
+                                    
+                                    <Label text="Dentist Profile:" style="-fx-font-weight: bold;" />
+                                    <ScrollPane prefHeight="100" fitToWidth="true">
+                                        <TextArea fx:id="dentistProfileArea" editable="false" wrapText="true" prefRowCount="4" />
+                                    </ScrollPane>
+                                    
+                                    <Label text="Available Dates:" style="-fx-font-weight: bold;" />
+                                    <DatePicker fx:id="appointmentDatePicker" prefWidth="180" onAction="#handleDateSelection" />
+                                    
+                                    <Label text="Available Times:" style="-fx-font-weight: bold;" />
+                                    <ListView fx:id="timeSlotsList" prefHeight="120" onMouseClicked="#handleTimeSlotSelection" />
+                                    
+                                    <Button text="Book Appointment" fx:id="bookAppointmentButton" prefWidth="150" onAction="#handleBookAppointment" />
+                                </VBox>
+                            </Tab>
+                            <Tab text="Browse Dentists">
+                                <VBox spacing="8" style="-fx-padding: 8;">
+                                    <TableView fx:id="dentistsTable" prefHeight="300" onMouseClicked="#handleDentistTableSelection">
+                                        <columns>
+                                            <TableColumn text="Name" prefWidth="100" />
+                                            <TableColumn text="Specialization" prefWidth="120" />
+                                        </columns>
+                                    </TableView>
+                                    <Label text="Description:" style="-fx-font-weight: bold;" />
+                                    <ScrollPane prefHeight="100" fitToWidth="true">
+                                        <TextArea fx:id="selectedDentistDescArea" editable="false" wrapText="true" prefRowCount="4" />
+                                    </ScrollPane>
+                                </VBox>
+                            </Tab>
+                        </TabPane>
                     </VBox>
                 </HBox>
             </content>

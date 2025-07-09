@@ -58,6 +58,20 @@ public class RMIClient {
         connectToServer();
     }
     
+    public boolean updateUser(User user) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.updateUser(user);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Update failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public UserServiceInterface getUserService() {
         return userService;
     }
