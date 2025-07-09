@@ -77,7 +77,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
         String specialization = specializationField.getText().trim();
         String description = descriptionArea.getText().trim();
         
-        showAlert("Info", "Profile updated (specialization and description features coming soon)");
+        showAlert("Info", "Profile updated - TODO WIP");
     }
     
     private void showAlert(String title, String message) {

@@ -4,6 +4,7 @@ import service.UserService;
 import model.User;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 
 public class UserServiceImpl extends UnicastRemoteObject implements UserServiceInterface {
     private UserService userService;
@@ -62,6 +63,27 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
         } catch (Exception e) {
             System.err.println("ViaBook Server: Update error: " + e.getMessage());
             throw new RemoteException("User update failed", e);
+        }
+    }
+    
+    @Override
+    public List<User> getAllUsers() throws RemoteException {
+        try {
+            return userService.getAllUsers();
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get all users error: " + e.getMessage());
+            throw new RemoteException("Get all users failed", e);
+        }
+    }
+    
+    @Override
+    public boolean deleteUser(int userId) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Delete attempt for user ID: " + userId);
+            return userService.deleteUser(userId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Delete error: " + e.getMessage());
+            throw new RemoteException("User delete failed", e);
         }
     }
 } 

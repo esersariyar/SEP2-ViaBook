@@ -3,6 +3,7 @@ package rmi;
 import model.User;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 public interface UserServiceInterface extends Remote {
     
@@ -13,4 +14,8 @@ public interface UserServiceInterface extends Remote {
     boolean isValidUser(String email) throws RemoteException;
     
     boolean updateUser(User user) throws RemoteException;
+    
+    List<User> getAllUsers() throws RemoteException;
+    
+    boolean deleteUser(int userId) throws RemoteException;
 } 

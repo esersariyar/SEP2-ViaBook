@@ -4,6 +4,8 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import rmi.UserServiceInterface;
 import model.User;
+import java.util.List;
+import java.util.ArrayList;
 
 public class RMIClient {
     private static final String SERVER_BASE_URL = "rmi://localhost:1099/";
@@ -70,6 +72,34 @@ public class RMIClient {
             return userService.updateUser(user);
         } catch (RemoteException e) {
             System.err.println("ViaBook Client: Update failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<User> getAllUsers() {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        
+        try {
+            return userService.getAllUsers();
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get all users failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    public boolean deleteUser(int userId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.deleteUser(userId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Delete failed: " + e.getMessage());
             return false;
         }
     }
