@@ -119,6 +119,20 @@ public class RMIClient {
         }
     }
     
+    public boolean updateDentistProfile(DentistProfile profile) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.updateDentistProfile(profile);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Update dentist profile failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public UserServiceInterface getUserService() {
         return userService;
     }

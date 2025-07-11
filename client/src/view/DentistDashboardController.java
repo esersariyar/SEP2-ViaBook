@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.User;
+import model.DentistProfile;
 import service.RMIClient;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -59,6 +60,22 @@ public class DentistDashboardController extends BaseDashboardController implemen
             surnameLabel.setText(user.getLastName());
             emailLabel.setText(user.getEmail());
             currentUser = user;
+            
+            loadDentistProfile();
+        }
+    }
+    
+    private void loadDentistProfile() {
+        if (currentUser != null) {
+            DentistProfile profile = rmiClient.getDentistProfile(currentUser.getId());
+            if (profile != null) {
+                if (specializationField != null) {
+                    specializationField.setText(profile.getSpecialization() != null ? profile.getSpecialization() : "");
+                }
+                if (descriptionArea != null) {
+                    descriptionArea.setText(profile.getDescription() != null ? profile.getDescription() : "");
+                }
+            }
         }
     }
 
@@ -77,7 +94,13 @@ public class DentistDashboardController extends BaseDashboardController implemen
         String specialization = specializationField.getText().trim();
         String description = descriptionArea.getText().trim();
         
-        showAlert("Info", "Profile updated - TODO WIP");
+        DentistProfile profile = new DentistProfile(currentUser.getId(), description, specialization);
+        
+        if (rmiClient.updateDentistProfile(profile)) {
+            showAlert("Success", "Profile updated successfully");
+        } else {
+            showAlert("Error", "Failed to update profile");
+        }
     }
     
     private void showAlert(String title, String message) {

@@ -58,4 +58,12 @@ public class UserService {
     public DentistProfile getDentistProfile(int userId) {
         return dentistProfileDAO.getProfileByUserId(userId);
     }
+    
+    public boolean updateDentistProfile(DentistProfile profile) {
+        if (profile == null || profile.getUserId() <= 0) {
+            return false;
+        }
+        
+        return dentistProfileDAO.createOrUpdateProfile(profile);
+    }
 } 

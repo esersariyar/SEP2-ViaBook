@@ -21,4 +21,6 @@ public interface UserServiceInterface extends Remote {
     boolean deleteUser(int userId) throws RemoteException;
     
     DentistProfile getDentistProfile(int userId) throws RemoteException;
+    
+    boolean updateDentistProfile(DentistProfile profile) throws RemoteException;
 } 

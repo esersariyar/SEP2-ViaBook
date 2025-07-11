@@ -97,4 +97,15 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
             throw new RemoteException("Get dentist profile failed", e);
         }
     }
+    
+    @Override
+    public boolean updateDentistProfile(DentistProfile profile) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Update dentist profile attempt for user ID: " + profile.getUserId());
+            return userService.updateDentistProfile(profile);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Update dentist profile error: " + e.getMessage());
+            throw new RemoteException("Update dentist profile failed", e);
+        }
+    }
 } 
