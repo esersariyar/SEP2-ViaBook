@@ -3,6 +3,7 @@ package rmi;
 import service.UserService;
 import model.User;
 import model.DentistProfile;
+import model.WorkingHours;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -106,6 +107,49 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
         } catch (Exception e) {
             System.err.println("ViaBook Server: Update dentist profile error: " + e.getMessage());
             throw new RemoteException("Update dentist profile failed", e);
+        }
+    }
+    
+    @Override
+    public List<WorkingHours> getWorkingHours(int dentistId) throws RemoteException {
+        try {
+            return userService.getWorkingHours(dentistId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get working hours error: " + e.getMessage());
+            throw new RemoteException("Get working hours failed", e);
+        }
+    }
+    
+    @Override
+    public boolean addWorkingHours(WorkingHours workingHours) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Add working hours attempt for dentist ID: " + workingHours.getDentistId());
+            return userService.addWorkingHours(workingHours);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Add working hours error: " + e.getMessage());
+            throw new RemoteException("Add working hours failed", e);
+        }
+    }
+    
+    @Override
+    public boolean updateWorkingHours(WorkingHours workingHours) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Update working hours attempt for dentist ID: " + workingHours.getDentistId());
+            return userService.updateWorkingHours(workingHours);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Update working hours error: " + e.getMessage());
+            throw new RemoteException("Update working hours failed", e);
+        }
+    }
+    
+    @Override
+    public boolean deleteWorkingHours(int dentistId, String dayOfWeek) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Delete working hours attempt for dentist ID: " + dentistId + ", day: " + dayOfWeek);
+            return userService.deleteWorkingHours(dentistId, dayOfWeek);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Delete working hours error: " + e.getMessage());
+            throw new RemoteException("Delete working hours failed", e);
         }
     }
 } 

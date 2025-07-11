@@ -10,8 +10,13 @@ import javafx.collections.ObservableList;
 import javafx.beans.property.SimpleStringProperty;
 import model.User;
 import model.DentistProfile;
+import model.WorkingHours;
 import service.RMIClient;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -33,7 +38,7 @@ public class PatientDashboardController extends BaseDashboardController implemen
     @FXML private ComboBox<User> dentistComboBox;
     @FXML private TextArea dentistProfileArea;
     @FXML private DatePicker appointmentDatePicker;
-    @FXML private ListView timeSlotsList;
+    @FXML private ListView<String> timeSlotsList;
     @FXML private Button bookAppointmentButton;
     
     @FXML private TableView<User> dentistsTable;
@@ -41,11 +46,16 @@ public class PatientDashboardController extends BaseDashboardController implemen
     
     private User currentUser;
     private RMIClient rmiClient = new RMIClient();
+    private ObservableList<String> availableTimeSlots = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupDentistTable();
         loadDentists();
+        
+        if (timeSlotsList != null) {
+            timeSlotsList.setItems(availableTimeSlots);
+        }
     }
     
     private void setupDentistTable() {
@@ -181,22 +191,104 @@ public class PatientDashboardController extends BaseDashboardController implemen
             }
             
             dentistProfileArea.setText(profileText);
+            
+            // Load available times when dentist is selected
+            loadAvailableTimeSlots();
         }
     }
     
     @FXML
     private void handleDateSelection() {
-        System.out.println("Date selected");
+        loadAvailableTimeSlots();
+    }
+    
+    private void loadAvailableTimeSlots() {
+        availableTimeSlots.clear();
+        
+        User selectedDentist = dentistComboBox.getSelectionModel().getSelectedItem();
+        LocalDate selectedDate = appointmentDatePicker.getValue();
+        
+        if (selectedDentist == null || selectedDate == null) {
+            return;
+        }
+        
+        if (selectedDate.isBefore(LocalDate.now())) {
+            availableTimeSlots.add("Cannot book appointments for past dates");
+            return;
+        }
+        
+        // Get dentists working hours for the selected day
+        String dayOfWeek = selectedDate.getDayOfWeek().toString();
+        dayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
+        
+        List<WorkingHours> workingHoursList = rmiClient.getWorkingHours(selectedDentist.getId());
+        WorkingHours workingHoursForDay = null;
+        
+        for (WorkingHours wh : workingHoursList) {
+            if (wh.getDayOfWeek().equals(dayOfWeek)) {
+                workingHoursForDay = wh;
+                break;
+            }
+        }
+        
+        if (workingHoursForDay == null) {
+            availableTimeSlots.add("No working hours set for " + dayOfWeek);
+            return;
+        }
+        
+        // Generate time slots (every 30 minutes)
+        LocalTime startTime = workingHoursForDay.getStartTime();
+        LocalTime endTime = workingHoursForDay.getEndTime();
+        
+        List<String> timeSlots = new ArrayList<>();
+        LocalTime currentTime = startTime;
+        
+        while (currentTime.isBefore(endTime)) {
+            timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+            currentTime = currentTime.plusMinutes(30);
+        }
+        
+        if (timeSlots.isEmpty()) {
+            availableTimeSlots.add("No available time slots");
+        } else {
+            availableTimeSlots.addAll(timeSlots);
+        }
     }
     
     @FXML
     private void handleTimeSlotSelection(MouseEvent event) {
-        System.out.println("Time slot selected");
+        String selectedTimeSlot = timeSlotsList.getSelectionModel().getSelectedItem();
+        if (selectedTimeSlot != null && !selectedTimeSlot.contains("No") && !selectedTimeSlot.contains("Cannot")) {
+            System.out.println("Selected time slot: " + selectedTimeSlot);
+        }
     }
     
     @FXML
     private void handleBookAppointment() {
-        System.out.println("Book appointment clicked");
+        User selectedDentist = dentistComboBox.getSelectionModel().getSelectedItem();
+        LocalDate selectedDate = appointmentDatePicker.getValue();
+        String selectedTimeSlot = timeSlotsList.getSelectionModel().getSelectedItem();
+        
+        if (selectedDentist == null) {
+            showAlert("Error", "Please select a dentist");
+            return;
+        }
+        
+        if (selectedDate == null) {
+            showAlert("Error", "Please select a date");
+            return;
+        }
+        
+        if (selectedTimeSlot == null || selectedTimeSlot.contains("No") || selectedTimeSlot.contains("Cannot")) {
+            showAlert("Error", "Please select a valid time slot");
+            return;
+        }
+        
+        showAlert("Info", "apointment success WIP TODO!!! \n\n" +
+                "Selected:\n" +
+                "Dentist: Dr. " + selectedDentist.getFirstName() + " " + selectedDentist.getLastName() + "\n" +
+                "Date: " + selectedDate + "\n" +
+                "Time: " + selectedTimeSlot);
     }
     
     @FXML

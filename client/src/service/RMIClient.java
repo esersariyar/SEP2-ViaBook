@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import rmi.UserServiceInterface;
 import model.User;
 import model.DentistProfile;
+import model.WorkingHours;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -129,6 +130,62 @@ public class RMIClient {
             return userService.updateDentistProfile(profile);
         } catch (RemoteException e) {
             System.err.println("ViaBook Client: Update dentist profile failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<WorkingHours> getWorkingHours(int dentistId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        
+        try {
+            return userService.getWorkingHours(dentistId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get working hours failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    public boolean addWorkingHours(WorkingHours workingHours) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.addWorkingHours(workingHours);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Add working hours failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean updateWorkingHours(WorkingHours workingHours) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.updateWorkingHours(workingHours);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Update working hours failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean deleteWorkingHours(int dentistId, String dayOfWeek) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.deleteWorkingHours(dentistId, dayOfWeek);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Delete working hours failed: " + e.getMessage());
             return false;
         }
     }

@@ -2,6 +2,7 @@ package rmi;
 
 import model.User;
 import model.DentistProfile;
+import model.WorkingHours;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -23,4 +24,12 @@ public interface UserServiceInterface extends Remote {
     DentistProfile getDentistProfile(int userId) throws RemoteException;
     
     boolean updateDentistProfile(DentistProfile profile) throws RemoteException;
+    
+    List<WorkingHours> getWorkingHours(int dentistId) throws RemoteException;
+    
+    boolean addWorkingHours(WorkingHours workingHours) throws RemoteException;
+    
+    boolean updateWorkingHours(WorkingHours workingHours) throws RemoteException;
+    
+    boolean deleteWorkingHours(int dentistId, String dayOfWeek) throws RemoteException;
 } 

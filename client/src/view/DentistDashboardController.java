@@ -3,15 +3,23 @@ package view;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.User;
 import model.DentistProfile;
+import model.WorkingHours;
 import service.RMIClient;
 import java.net.URL;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DentistDashboardController extends BaseDashboardController implements Initializable {
@@ -24,7 +32,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
     @FXML private TextArea descriptionArea;
     @FXML private Button updateProfileButton;
     
-    @FXML private TableView workingHoursTable;
+    @FXML private TableView<WorkingHours> workingHoursTable;
     @FXML private ComboBox<String> dayComboBox;
     @FXML private TextField startTimeField;
     @FXML private TextField endTimeField;
@@ -43,6 +51,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
     
     private User currentUser;
     private RMIClient rmiClient = new RMIClient();
+    private ObservableList<WorkingHours> workingHoursList = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -51,6 +60,32 @@ public class DentistDashboardController extends BaseDashboardController implemen
                 "Monday", "Tuesday", "Wednesday", "Thursday", 
                 "Friday", "Saturday", "Sunday"
             );
+        }
+        
+        setupWorkingHoursTable();
+    }
+    
+    private void setupWorkingHoursTable() {
+        if (workingHoursTable != null && workingHoursTable.getColumns().size() >= 3) {
+            TableColumn<WorkingHours, String> dayColumn = (TableColumn<WorkingHours, String>) workingHoursTable.getColumns().get(0);
+            TableColumn<WorkingHours, String> startColumn = (TableColumn<WorkingHours, String>) workingHoursTable.getColumns().get(1);
+            TableColumn<WorkingHours, String> endColumn = (TableColumn<WorkingHours, String>) workingHoursTable.getColumns().get(2);
+            
+            dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayOfWeek"));
+            startColumn.setCellValueFactory(cellData -> {
+                LocalTime startTime = cellData.getValue().getStartTime();
+                return new javafx.beans.property.SimpleStringProperty(
+                    startTime != null ? startTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
+                );
+            });
+            endColumn.setCellValueFactory(cellData -> {
+                LocalTime endTime = cellData.getValue().getEndTime();
+                return new javafx.beans.property.SimpleStringProperty(
+                    endTime != null ? endTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
+                );
+            });
+            
+            workingHoursTable.setItems(workingHoursList);
         }
     }
 
@@ -62,6 +97,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
             currentUser = user;
             
             loadDentistProfile();
+            loadWorkingHours();
         }
     }
     
@@ -76,6 +112,14 @@ public class DentistDashboardController extends BaseDashboardController implemen
                     descriptionArea.setText(profile.getDescription() != null ? profile.getDescription() : "");
                 }
             }
+        }
+    }
+    
+    private void loadWorkingHours() {
+        if (currentUser != null) {
+            List<WorkingHours> hours = rmiClient.getWorkingHours(currentUser.getId());
+            workingHoursList.clear();
+            workingHoursList.addAll(hours);
         }
     }
 
@@ -103,30 +147,123 @@ public class DentistDashboardController extends BaseDashboardController implemen
         }
     }
     
+    @FXML
+    private void handleAddWorkingHours() {
+        if (currentUser == null) {
+            showAlert("Error", "No user logged in");
+            return;
+        }
+        
+        String selectedDay = dayComboBox.getSelectionModel().getSelectedItem();
+        String startTimeText = startTimeField.getText().trim();
+        String endTimeText = endTimeField.getText().trim();
+        
+        if (selectedDay == null || startTimeText.isEmpty() || endTimeText.isEmpty()) {
+            showAlert("Error", "Please fill all fields");
+            return;
+        }
+        
+        try {
+            LocalTime startTime = LocalTime.parse(startTimeText, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime endTime = LocalTime.parse(endTimeText, DateTimeFormatter.ofPattern("HH:mm"));
+            
+            if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+                showAlert("Error", "Start time must be before end time");
+                return;
+            }
+            
+            WorkingHours workingHours = new WorkingHours(currentUser.getId(), selectedDay, startTime, endTime);
+            
+            if (rmiClient.addWorkingHours(workingHours)) {
+                showAlert("Success", "Working hours added successfully");
+                loadWorkingHours();
+                clearWorkingHoursFields();
+            } else {
+                showAlert("Error", "Failed to add working hours. Day might already exist.");
+            }
+        } catch (DateTimeParseException e) {
+            showAlert("Error", "Invalid time format. Use HH:mm (e.g., 09:00)");
+        }
+    }
+    
+    @FXML
+    private void handleUpdateWorkingHours() {
+        WorkingHours selectedHours = workingHoursTable.getSelectionModel().getSelectedItem();
+        if (selectedHours == null) {
+            showAlert("Error", "Please select working hours to update");
+            return;
+        }
+        
+        String startTimeText = startTimeField.getText().trim();
+        String endTimeText = endTimeField.getText().trim();
+        
+        if (startTimeText.isEmpty() || endTimeText.isEmpty()) {
+            showAlert("Error", "Please fill start and end time fields");
+            return;
+        }
+        
+        try {
+            LocalTime startTime = LocalTime.parse(startTimeText, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime endTime = LocalTime.parse(endTimeText, DateTimeFormatter.ofPattern("HH:mm"));
+            
+            if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+                showAlert("Error", "Start time must be before end time");
+                return;
+            }
+            
+            WorkingHours updatedHours = new WorkingHours(currentUser.getId(), selectedHours.getDayOfWeek(), startTime, endTime);
+            
+            if (rmiClient.updateWorkingHours(updatedHours)) {
+                showAlert("Success", "Working hours updated successfully");
+                loadWorkingHours();
+                clearWorkingHoursFields();
+            } else {
+                showAlert("Error", "Failed to update working hours");
+            }
+        } catch (DateTimeParseException e) {
+            showAlert("Error", "Invalid time format. Use HH:mm (e.g., 09:00)");
+        }
+    }
+    
+    @FXML
+    private void handleDeleteWorkingHours() {
+        WorkingHours selectedHours = workingHoursTable.getSelectionModel().getSelectedItem();
+        if (selectedHours == null) {
+            showAlert("Error", "Please select working hours to delete");
+            return;
+        }
+        
+        if (rmiClient.deleteWorkingHours(currentUser.getId(), selectedHours.getDayOfWeek())) {
+            showAlert("Success", "Working hours deleted successfully");
+            loadWorkingHours();
+            clearWorkingHoursFields();
+        } else {
+            showAlert("Error", "Failed to delete working hours");
+        }
+    }
+    
+    @FXML
+    private void handleWorkingHoursSelection() {
+        WorkingHours selectedHours = workingHoursTable.getSelectionModel().getSelectedItem();
+        if (selectedHours != null) {
+            dayComboBox.getSelectionModel().select(selectedHours.getDayOfWeek());
+            startTimeField.setText(selectedHours.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+            endTimeField.setText(selectedHours.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+        }
+    }
+    
+    private void clearWorkingHoursFields() {
+        dayComboBox.getSelectionModel().clearSelection();
+        startTimeField.clear();
+        endTimeField.clear();
+    }
+    
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-    
-    @FXML
-    private void handleAddWorkingHours() {
-        // TODO: Implement add working hours functionality
-        System.out.println("Add working hours clicked");
-    }
-    
-    @FXML
-    private void handleUpdateWorkingHours() {
-        // TODO: Implement update working hours functionality
-        System.out.println("Update working hours clicked");
-    }
-    
-    @FXML
-    private void handleDeleteWorkingHours() {
-        // TODO: Implement delete working hours functionality
-        System.out.println("Delete working hours clicked");
     }
     
     @FXML
