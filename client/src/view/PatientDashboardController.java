@@ -251,11 +251,32 @@ public class PatientDashboardController extends BaseDashboardController implemen
             return;
         }
         
-        if (rmiClient.updateAppointmentStatus(selectedAppointment.getId(), "cancelled")) {
-            showAlert("Success", "Appointment cancelled successfully");
-            loadUpcomingAppointments(); // Refresh the table
-        } else {
-            showAlert("Error", "Failed to cancel appointment");
+        // Check if appointment is within 24 hours
+        LocalDateTime appointmentTime = selectedAppointment.getAppointmentTime();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime cancelDeadline = appointmentTime.minusHours(24);
+        
+        if (now.isAfter(cancelDeadline)) {
+            showAlert("Error", "Appointments can only be cancelled at least 24 hours before the scheduled time.\n\n" +
+                    "Appointment time: " + appointmentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n" +
+                    "Cancel deadline: " + cancelDeadline.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            return;
+        }
+        
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Cancel Appointment");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Are you sure you want to cancel this appointment?\n\n" +
+                "Date: " + appointmentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                "Time: " + appointmentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        
+        if (confirmation.showAndWait().get() == ButtonType.OK) {
+            if (rmiClient.updateAppointmentStatus(selectedAppointment.getId(), "cancelled")) {
+                showAlert("Success", "Appointment cancelled successfully");
+                loadUpcomingAppointments(); // Refresh the table
+            } else {
+                showAlert("Error", "Failed to cancel appointment");
+            }
         }
     }
     

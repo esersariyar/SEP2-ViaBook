@@ -7,9 +7,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleStringProperty;
 import model.User;
+import model.Appointment;
 import service.RMIClient;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -18,6 +21,14 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     @FXML private Label nameLabel;
     @FXML private Label surnameLabel;
     @FXML private Label emailLabel;
+    
+    @FXML private TableView<Appointment> pendingAppointmentsTable;
+    @FXML private Button approveButton;
+    @FXML private Button rejectButton;
+    
+    @FXML private ComboBox<String> statusFilterComboBox;
+    @FXML private Button refreshButton;
+    @FXML private TableView<Appointment> allAppointmentsTable;
     
     @FXML private Button createDentistButton;
     @FXML private VBox dentistForm;
@@ -30,14 +41,127 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     @FXML private TableView<User> dentistsTable;
     
     private RMIClient rmiClient = new RMIClient();
+    private ObservableList<Appointment> pendingAppointments = FXCollections.observableArrayList();
+    private ObservableList<Appointment> allAppointments = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setupTableColumns();
+        setupPendingAppointmentsTable();
+        setupAllAppointmentsTable();
+        setupDentistsTable();
+        setupStatusFilter();
         loadDentists();
+        loadAllAppointments();
     }
     
-    private void setupTableColumns() {
+    private void setupPendingAppointmentsTable() {
+        if (pendingAppointmentsTable != null && pendingAppointmentsTable.getColumns().size() >= 5) {
+            TableColumn<Appointment, String> dateColumn = (TableColumn<Appointment, String>) pendingAppointmentsTable.getColumns().get(0);
+            TableColumn<Appointment, String> timeColumn = (TableColumn<Appointment, String>) pendingAppointmentsTable.getColumns().get(1);
+            TableColumn<Appointment, String> patientColumn = (TableColumn<Appointment, String>) pendingAppointmentsTable.getColumns().get(2);
+            TableColumn<Appointment, String> dentistColumn = (TableColumn<Appointment, String>) pendingAppointmentsTable.getColumns().get(3);
+            TableColumn<Appointment, String> statusColumn = (TableColumn<Appointment, String>) pendingAppointmentsTable.getColumns().get(4);
+            
+            dateColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                );
+            });
+            
+            timeColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+                );
+            });
+            
+            patientColumn.setCellValueFactory(cellData -> {
+                User patient = getUserById(cellData.getValue().getPatientId());
+                return new SimpleStringProperty(
+                    patient != null ? patient.getFirstName() + " " + patient.getLastName() : "Unknown"
+                );
+            });
+            
+            dentistColumn.setCellValueFactory(cellData -> {
+                User dentist = getUserById(cellData.getValue().getDentistId());
+                return new SimpleStringProperty(
+                    dentist != null ? "Dr. " + dentist.getFirstName() + " " + dentist.getLastName() : "Unknown"
+                );
+            });
+            
+            statusColumn.setCellValueFactory(cellData -> {
+                String status = cellData.getValue().getStatus();
+                return new SimpleStringProperty(
+                    status != null ? status.substring(0, 1).toUpperCase() + status.substring(1) : "Unknown"
+                );
+            });
+            
+            pendingAppointmentsTable.setItems(pendingAppointments);
+        }
+    }
+    
+    private void setupAllAppointmentsTable() {
+        if (allAppointmentsTable != null && allAppointmentsTable.getColumns().size() >= 5) {
+            TableColumn<Appointment, String> dateColumn = (TableColumn<Appointment, String>) allAppointmentsTable.getColumns().get(0);
+            TableColumn<Appointment, String> timeColumn = (TableColumn<Appointment, String>) allAppointmentsTable.getColumns().get(1);
+            TableColumn<Appointment, String> patientColumn = (TableColumn<Appointment, String>) allAppointmentsTable.getColumns().get(2);
+            TableColumn<Appointment, String> dentistColumn = (TableColumn<Appointment, String>) allAppointmentsTable.getColumns().get(3);
+            TableColumn<Appointment, String> statusColumn = (TableColumn<Appointment, String>) allAppointmentsTable.getColumns().get(4);
+            
+            dateColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                );
+            });
+            
+            timeColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+                );
+            });
+            
+            patientColumn.setCellValueFactory(cellData -> {
+                User patient = getUserById(cellData.getValue().getPatientId());
+                return new SimpleStringProperty(
+                    patient != null ? patient.getFirstName() + " " + patient.getLastName() : "Unknown"
+                );
+            });
+            
+            dentistColumn.setCellValueFactory(cellData -> {
+                User dentist = getUserById(cellData.getValue().getDentistId());
+                return new SimpleStringProperty(
+                    dentist != null ? "Dr. " + dentist.getFirstName() + " " + dentist.getLastName() : "Unknown"
+                );
+            });
+            
+            statusColumn.setCellValueFactory(cellData -> {
+                String status = cellData.getValue().getStatus();
+                return new SimpleStringProperty(
+                    status != null ? status.substring(0, 1).toUpperCase() + status.substring(1) : "Unknown"
+                );
+            });
+            
+            allAppointmentsTable.setItems(allAppointments);
+        }
+    }
+    
+    private void setupStatusFilter() {
+        if (statusFilterComboBox != null) {
+            statusFilterComboBox.getItems().addAll("All", "Pending", "Approved", "Cancelled");
+            statusFilterComboBox.getSelectionModel().selectFirst();
+        }
+    }
+    
+    private User getUserById(int userId) {
+        List<User> allUsers = rmiClient.getAllUsers();
+        for (User user : allUsers) {
+            if (user.getId() == userId) {
+                return user;
+            }
+        }
+        return null;
+    }
+    
+    private void setupDentistsTable() {
         if (dentistsTable != null && dentistsTable.getColumns().size() >= 3) {
             TableColumn<User, String> nameColumn = (TableColumn<User, String>) dentistsTable.getColumns().get(0);
             TableColumn<User, String> surnameColumn = (TableColumn<User, String>) dentistsTable.getColumns().get(1);
@@ -58,6 +182,30 @@ public class SecretaryDashboardController extends BaseDashboardController implem
                 return row;
             });
         }
+    }
+    
+    private void loadPendingAppointments() {
+        pendingAppointments.clear();
+        for (Appointment appointment : allAppointments) {
+            if ("pending".equals(appointment.getStatus())) {
+                pendingAppointments.add(appointment);
+            }
+        }
+    }
+    
+    private void loadAllAppointments() {
+        // Get all appointments from all dentists
+        List<User> allUsers = rmiClient.getAllUsers();
+        allAppointments.clear();
+        
+        for (User user : allUsers) {
+            if ("dentist".equals(user.getRole())) {
+                List<Appointment> dentistAppointments = rmiClient.getDentistAppointments(user.getId());
+                allAppointments.addAll(dentistAppointments);
+            }
+        }
+        
+        loadPendingAppointments();
     }
     
     private void handleDeleteDentist(User dentist) {
@@ -87,6 +235,64 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     @FXML
     private void handleLogout() {
         logout(logoutButton);
+    }
+    
+    @FXML
+    private void handleApproveAppointment() {
+        Appointment selectedAppointment = pendingAppointmentsTable.getSelectionModel().getSelectedItem();
+        if (selectedAppointment == null) {
+            showAlert("Error", "Please select an appointment to approve");
+            return;
+        }
+        
+        if (rmiClient.updateAppointmentStatus(selectedAppointment.getId(), "approved")) {
+            showAlert("Success", "Appointment approved successfully");
+            loadAllAppointments();
+        } else {
+            showAlert("Error", "Failed to approve appointment");
+        }
+    }
+    
+    @FXML
+    private void handleRejectAppointment() {
+        Appointment selectedAppointment = pendingAppointmentsTable.getSelectionModel().getSelectedItem();
+        if (selectedAppointment == null) {
+            showAlert("Error", "Please select an appointment to reject");
+            return;
+        }
+        
+        if (rmiClient.updateAppointmentStatus(selectedAppointment.getId(), "cancelled")) {
+            showAlert("Success", "Appointment rejected successfully");
+            loadAllAppointments();
+        } else {
+            showAlert("Error", "Failed to reject appointment");
+        }
+    }
+    
+    @FXML
+    private void handleStatusFilter() {
+        String selectedStatus = statusFilterComboBox.getSelectionModel().getSelectedItem();
+        if (selectedStatus != null && !"All".equals(selectedStatus)) {
+            String status = selectedStatus.toLowerCase();
+            ObservableList<Appointment> filteredAppointments = FXCollections.observableArrayList();
+            
+            for (Appointment appointment : allAppointments) {
+                if (status.equals(appointment.getStatus())) {
+                    filteredAppointments.add(appointment);
+                }
+            }
+            
+            allAppointmentsTable.setItems(filteredAppointments);
+        } else {
+            allAppointmentsTable.setItems(allAppointments);
+        }
+    }
+    
+    @FXML
+    private void handleRefresh() {
+        loadAllAppointments();
+        statusFilterComboBox.getSelectionModel().selectFirst();
+        showAlert("Info", "Appointments refreshed");
     }
     
     @FXML
