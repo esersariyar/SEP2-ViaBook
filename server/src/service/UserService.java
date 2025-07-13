@@ -6,17 +6,21 @@ import dao.WorkingHoursDAO;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserService {
     private UserDAO userDAO;
     private DentistProfileDAO dentistProfileDAO;
     private WorkingHoursDAO workingHoursDAO;
+    private AppointmentService appointmentService;
     
     public UserService() {
         this.userDAO = new UserDAO();
         this.dentistProfileDAO = new DentistProfileDAO();
         this.workingHoursDAO = new WorkingHoursDAO();
+        this.appointmentService = new AppointmentService();
     }
     
     public User authenticateUser(String email, String password) {
@@ -101,5 +105,25 @@ public class UserService {
         }
         
         return workingHoursDAO.deleteWorkingHours(dentistId, dayOfWeek);
+    }
+    
+    public boolean createAppointment(int patientId, int dentistId, LocalDateTime appointmentTime) {
+        return appointmentService.createAppointment(patientId, dentistId, appointmentTime);
+    }
+    
+    public List<Appointment> getPatientAppointments(int patientId) {
+        return appointmentService.getPatientAppointments(patientId);
+    }
+    
+    public List<Appointment> getDentistAppointments(int dentistId) {
+        return appointmentService.getDentistAppointments(dentistId);
+    }
+    
+    public boolean updateAppointmentStatus(int appointmentId, String status) {
+        return appointmentService.updateAppointmentStatus(appointmentId, status);
+    }
+    
+    public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
+        return appointmentService.isTimeSlotAvailable(dentistId, appointmentTime);
     }
 } 

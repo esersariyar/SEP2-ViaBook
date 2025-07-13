@@ -11,9 +11,11 @@ import javafx.beans.property.SimpleStringProperty;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
 import service.RMIClient;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class PatientDashboardController extends BaseDashboardController implemen
     @FXML private TextField emailField;
     @FXML private Button updateProfileButton;
     
-    @FXML private TableView upcomingAppointmentsTable;
+    @FXML private TableView<Appointment> upcomingAppointmentsTable;
     @FXML private TableView pastAppointmentsTable;
     @FXML private Button cancelAppointmentButton;
     
@@ -47,15 +49,70 @@ public class PatientDashboardController extends BaseDashboardController implemen
     private User currentUser;
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<String> availableTimeSlots = FXCollections.observableArrayList();
+    private ObservableList<Appointment> upcomingAppointments = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupDentistTable();
+        setupUpcomingAppointmentsTable();
         loadDentists();
         
         if (timeSlotsList != null) {
             timeSlotsList.setItems(availableTimeSlots);
         }
+    }
+    
+    private void setupUpcomingAppointmentsTable() {
+        if (upcomingAppointmentsTable != null && upcomingAppointmentsTable.getColumns().size() >= 5) {
+            TableColumn<Appointment, String> dateColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(0);
+            TableColumn<Appointment, String> timeColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(1);
+            TableColumn<Appointment, String> dentistColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(2);
+            TableColumn<Appointment, String> statusColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(3);
+            TableColumn<Appointment, String> actionsColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(4);
+            
+            dateColumn.setCellValueFactory(cellData -> {
+                LocalDateTime appointmentTime = cellData.getValue().getAppointmentTime();
+                return new SimpleStringProperty(
+                    appointmentTime != null ? appointmentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : ""
+                );
+            });
+            
+            timeColumn.setCellValueFactory(cellData -> {
+                LocalDateTime appointmentTime = cellData.getValue().getAppointmentTime();
+                return new SimpleStringProperty(
+                    appointmentTime != null ? appointmentTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
+                );
+            });
+            
+            dentistColumn.setCellValueFactory(cellData -> {
+                int dentistId = cellData.getValue().getDentistId();
+                User dentist = getUserById(dentistId);
+                return new SimpleStringProperty(
+                    dentist != null ? "Dr. " + dentist.getFirstName() + " " + dentist.getLastName() : "Unknown"
+                );
+            });
+            
+            statusColumn.setCellValueFactory(cellData -> {
+                String status = cellData.getValue().getStatus();
+                return new SimpleStringProperty(
+                    status != null ? status.substring(0, 1).toUpperCase() + status.substring(1) : "Unknown"
+                );
+            });
+            
+            actionsColumn.setCellValueFactory(cellData -> new SimpleStringProperty("Cancel"));
+            
+            upcomingAppointmentsTable.setItems(upcomingAppointments);
+        }
+    }
+    
+    private User getUserById(int userId) {
+        List<User> allUsers = rmiClient.getAllUsers();
+        for (User user : allUsers) {
+            if (user.getId() == userId) {
+                return user;
+            }
+        }
+        return null;
     }
     
     private void setupDentistTable() {
@@ -119,6 +176,21 @@ public class PatientDashboardController extends BaseDashboardController implemen
             dentistsTable.setItems(dentists);
         }
     }
+    
+    private void loadUpcomingAppointments() {
+        if (currentUser != null) {
+            List<Appointment> appointments = rmiClient.getPatientAppointments(currentUser.getId());
+            upcomingAppointments.clear();
+            
+            // Filter only upcoming appointments (future appointments)
+            LocalDateTime now = LocalDateTime.now();
+            for (Appointment appointment : appointments) {
+                if (appointment.getAppointmentTime().isAfter(now) && !"cancelled".equals(appointment.getStatus())) {
+                    upcomingAppointments.add(appointment);
+                }
+            }
+        }
+    }
 
     public void setUser(User user) {
         if (user != null) {
@@ -130,6 +202,9 @@ public class PatientDashboardController extends BaseDashboardController implemen
             if (lastNameField != null) lastNameField.setText(user.getLastName());
             if (emailField != null) emailField.setText(user.getEmail());
             currentUser = user;
+            
+            // Load user's appointments
+            loadUpcomingAppointments();
         }
     }
 
@@ -170,7 +245,18 @@ public class PatientDashboardController extends BaseDashboardController implemen
     
     @FXML
     private void handleCancelAppointment() {
-        System.out.println("Cancel appointment clicked");
+        Appointment selectedAppointment = upcomingAppointmentsTable.getSelectionModel().getSelectedItem();
+        if (selectedAppointment == null) {
+            showAlert("Error", "Please select an appointment to cancel");
+            return;
+        }
+        
+        if (rmiClient.updateAppointmentStatus(selectedAppointment.getId(), "cancelled")) {
+            showAlert("Success", "Appointment cancelled successfully");
+            loadUpcomingAppointments(); // Refresh the table
+        } else {
+            showAlert("Error", "Failed to cancel appointment");
+        }
     }
     
     @FXML
@@ -212,12 +298,13 @@ public class PatientDashboardController extends BaseDashboardController implemen
             return;
         }
         
+        // Don't allow booking for past dates
         if (selectedDate.isBefore(LocalDate.now())) {
             availableTimeSlots.add("Cannot book appointments for past dates");
             return;
         }
         
-        // Get dentists working hours for the selected day
+        // Get dentist's working hours for the selected day
         String dayOfWeek = selectedDate.getDayOfWeek().toString();
         dayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
         
@@ -244,7 +331,11 @@ public class PatientDashboardController extends BaseDashboardController implemen
         LocalTime currentTime = startTime;
         
         while (currentTime.isBefore(endTime)) {
-            timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+            // Check if time slot is available
+            LocalDateTime appointmentDateTime = LocalDateTime.of(selectedDate, currentTime);
+            if (rmiClient.isTimeSlotAvailable(selectedDentist.getId(), appointmentDateTime)) {
+                timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+            }
             currentTime = currentTime.plusMinutes(30);
         }
         
@@ -265,6 +356,11 @@ public class PatientDashboardController extends BaseDashboardController implemen
     
     @FXML
     private void handleBookAppointment() {
+        if (currentUser == null) {
+            showAlert("Error", "No user logged in");
+            return;
+        }
+        
         User selectedDentist = dentistComboBox.getSelectionModel().getSelectedItem();
         LocalDate selectedDate = appointmentDatePicker.getValue();
         String selectedTimeSlot = timeSlotsList.getSelectionModel().getSelectedItem();
@@ -284,11 +380,38 @@ public class PatientDashboardController extends BaseDashboardController implemen
             return;
         }
         
-        showAlert("Info", "apointment success WIP TODO!!! \n\n" +
-                "Selected:\n" +
-                "Dentist: Dr. " + selectedDentist.getFirstName() + " " + selectedDentist.getLastName() + "\n" +
-                "Date: " + selectedDate + "\n" +
-                "Time: " + selectedTimeSlot);
+        // Parse selected time
+        LocalTime selectedTime;
+        try {
+            selectedTime = LocalTime.parse(selectedTimeSlot, DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (Exception e) {
+            showAlert("Error", "Invalid time format");
+            return;
+        }
+        
+        LocalDateTime appointmentDateTime = LocalDateTime.of(selectedDate, selectedTime);
+        
+        // Create appointment
+        if (rmiClient.createAppointment(currentUser.getId(), selectedDentist.getId(), appointmentDateTime)) {
+            showAlert("Success", "Appointment booked successfully!\n\n" +
+                    "Details:\n" +
+                    "Dentist: Dr. " + selectedDentist.getFirstName() + " " + selectedDentist.getLastName() + "\n" +
+                    "Date: " + selectedDate + "\n" +
+                    "Time: " + selectedTimeSlot + "\n" +
+                    "Status: Pending");
+            
+            // Clear selections
+            dentistComboBox.getSelectionModel().clearSelection();
+            appointmentDatePicker.setValue(null);
+            timeSlotsList.getSelectionModel().clearSelection();
+            dentistProfileArea.clear();
+            availableTimeSlots.clear();
+            
+            // Refresh appointments table
+            loadUpcomingAppointments();
+        } else {
+            showAlert("Error", "Failed to book appointment. Time slot might be already taken.");
+        }
     }
     
     @FXML

@@ -4,8 +4,10 @@ import service.UserService;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserServiceImpl extends UnicastRemoteObject implements UserServiceInterface {
@@ -150,6 +152,58 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
         } catch (Exception e) {
             System.err.println("ViaBook Server: Delete working hours error: " + e.getMessage());
             throw new RemoteException("Delete working hours failed", e);
+        }
+    }
+    
+    @Override
+    public boolean createAppointment(int patientId, int dentistId, LocalDateTime appointmentTime) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Create appointment attempt - Patient ID: " + patientId + ", Dentist ID: " + dentistId);
+            return userService.createAppointment(patientId, dentistId, appointmentTime);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Create appointment error: " + e.getMessage());
+            throw new RemoteException("Create appointment failed", e);
+        }
+    }
+    
+    @Override
+    public List<Appointment> getPatientAppointments(int patientId) throws RemoteException {
+        try {
+            return userService.getPatientAppointments(patientId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get patient appointments error: " + e.getMessage());
+            throw new RemoteException("Get patient appointments failed", e);
+        }
+    }
+    
+    @Override
+    public List<Appointment> getDentistAppointments(int dentistId) throws RemoteException {
+        try {
+            return userService.getDentistAppointments(dentistId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get dentist appointments error: " + e.getMessage());
+            throw new RemoteException("Get dentist appointments failed", e);
+        }
+    }
+    
+    @Override
+    public boolean updateAppointmentStatus(int appointmentId, String status) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Update appointment status attempt - ID: " + appointmentId + ", Status: " + status);
+            return userService.updateAppointmentStatus(appointmentId, status);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Update appointment status error: " + e.getMessage());
+            throw new RemoteException("Update appointment status failed", e);
+        }
+    }
+    
+    @Override
+    public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) throws RemoteException {
+        try {
+            return userService.isTimeSlotAvailable(dentistId, appointmentTime);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Check time slot availability error: " + e.getMessage());
+            throw new RemoteException("Check time slot availability failed", e);
         }
     }
 } 

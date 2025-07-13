@@ -3,8 +3,10 @@ package rmi;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserServiceInterface extends Remote {
@@ -32,4 +34,14 @@ public interface UserServiceInterface extends Remote {
     boolean updateWorkingHours(WorkingHours workingHours) throws RemoteException;
     
     boolean deleteWorkingHours(int dentistId, String dayOfWeek) throws RemoteException;
+    
+    boolean createAppointment(int patientId, int dentistId, LocalDateTime appointmentTime) throws RemoteException;
+    
+    List<Appointment> getPatientAppointments(int patientId) throws RemoteException;
+    
+    List<Appointment> getDentistAppointments(int dentistId) throws RemoteException;
+    
+    boolean updateAppointmentStatus(int appointmentId, String status) throws RemoteException;
+    
+    boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) throws RemoteException;
 } 

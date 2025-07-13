@@ -12,30 +12,51 @@ public class AppointmentService {
         this.appointmentDAO = new AppointmentDAO();
     }
     
-    public boolean createAppointment(int userId, String title, String description, 
-                                   LocalDateTime startTime, LocalDateTime endTime) {
-        if (title == null || title.trim().isEmpty() || 
-            startTime == null || endTime == null || 
-            startTime.isAfter(endTime)) {
+    public boolean createAppointment(int patientId, int dentistId, LocalDateTime appointmentTime) {
+        if (patientId <= 0 || dentistId <= 0 || appointmentTime == null) {
             return false;
         }
         
-        Appointment appointment = new Appointment(userId, title, description, startTime, endTime);
+        // Check if appointment time is in the future
+        if (appointmentTime.isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        
+        // Check if time slot is available
+        if (!appointmentDAO.isTimeSlotAvailable(dentistId, appointmentTime)) {
+            return false;
+        }
+        
+        Appointment appointment = new Appointment(patientId, dentistId, appointmentTime);
         return appointmentDAO.createAppointment(appointment);
     }
     
-    public List<Appointment> getUserAppointments(int userId) {
-        return appointmentDAO.getAppointmentsByUser(userId);
+    public List<Appointment> getPatientAppointments(int patientId) {
+        return appointmentDAO.getAppointmentsByPatientId(patientId);
+    }
+    
+    public List<Appointment> getDentistAppointments(int dentistId) {
+        return appointmentDAO.getAppointmentsByDentistId(dentistId);
     }
     
     public boolean updateAppointmentStatus(int appointmentId, String status) {
-        // TODO: Get appointment by ID, update status, and save
-        return false;
+        if (appointmentId <= 0 || status == null || status.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Validate status
+        if (!"pending".equals(status) && !"approved".equals(status) && !"cancelled".equals(status)) {
+            return false;
+        }
+        
+        return appointmentDAO.updateAppointmentStatus(appointmentId, status);
     }
     
-    public boolean isValidTimeSlot(LocalDateTime startTime, LocalDateTime endTime) {
-        return startTime != null && endTime != null && 
-               startTime.isBefore(endTime) && 
-               startTime.isAfter(LocalDateTime.now());
+    public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
+        if (dentistId <= 0 || appointmentTime == null) {
+            return false;
+        }
+        
+        return appointmentDAO.isTimeSlotAvailable(dentistId, appointmentTime);
     }
 } 

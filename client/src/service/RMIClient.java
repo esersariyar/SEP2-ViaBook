@@ -6,6 +6,8 @@ import rmi.UserServiceInterface;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -186,6 +188,76 @@ public class RMIClient {
             return userService.deleteWorkingHours(dentistId, dayOfWeek);
         } catch (RemoteException e) {
             System.err.println("ViaBook Client: Delete working hours failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean createAppointment(int patientId, int dentistId, LocalDateTime appointmentTime) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.createAppointment(patientId, dentistId, appointmentTime);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Create appointment failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<Appointment> getPatientAppointments(int patientId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        
+        try {
+            return userService.getPatientAppointments(patientId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get patient appointments failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    public List<Appointment> getDentistAppointments(int dentistId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        
+        try {
+            return userService.getDentistAppointments(dentistId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get dentist appointments failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    public boolean updateAppointmentStatus(int appointmentId, String status) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.updateAppointmentStatus(appointmentId, status);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Update appointment status failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.isTimeSlotAvailable(dentistId, appointmentTime);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Check time slot availability failed: " + e.getMessage());
             return false;
         }
     }
