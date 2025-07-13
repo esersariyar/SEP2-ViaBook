@@ -7,6 +7,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.stage.Stage;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
+import model.Appointment;
 import service.RMIClient;
 import java.net.URL;
 import java.time.LocalTime;
@@ -40,7 +42,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
     @FXML private Button updateWorkingHoursButton;
     @FXML private Button deleteWorkingHoursButton;
     
-    @FXML private TableView upcomingAppointmentsTable;
+    @FXML private TableView<Appointment> upcomingAppointmentsTable;
     
     @FXML private DatePicker slotDatePicker;
     @FXML private ListView availableSlotsList;
@@ -52,6 +54,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
     private User currentUser;
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<WorkingHours> workingHoursList = FXCollections.observableArrayList();
+    private ObservableList<Appointment> upcomingAppointments = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -63,6 +66,54 @@ public class DentistDashboardController extends BaseDashboardController implemen
         }
         
         setupWorkingHoursTable();
+        setupUpcomingAppointmentsTable();
+    }
+    
+    private void setupUpcomingAppointmentsTable() {
+        if (upcomingAppointmentsTable != null && upcomingAppointmentsTable.getColumns().size() >= 4) {
+            TableColumn<Appointment, String> dateColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(0);
+            TableColumn<Appointment, String> timeColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(1);
+            TableColumn<Appointment, String> patientColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(2);
+            TableColumn<Appointment, String> statusColumn = (TableColumn<Appointment, String>) upcomingAppointmentsTable.getColumns().get(3);
+            
+            dateColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                );
+            });
+            
+            timeColumn.setCellValueFactory(cellData -> {
+                return new SimpleStringProperty(
+                    cellData.getValue().getAppointmentTime().format(DateTimeFormatter.ofPattern("HH:mm"))
+                );
+            });
+            
+            patientColumn.setCellValueFactory(cellData -> {
+                User patient = getUserById(cellData.getValue().getPatientId());
+                return new SimpleStringProperty(
+                    patient != null ? patient.getFirstName() + " " + patient.getLastName() : "Unknown"
+                );
+            });
+            
+            statusColumn.setCellValueFactory(cellData -> {
+                String status = cellData.getValue().getStatus();
+                return new SimpleStringProperty(
+                    status != null ? status.substring(0, 1).toUpperCase() + status.substring(1) : "Unknown"
+                );
+            });
+            
+            upcomingAppointmentsTable.setItems(upcomingAppointments);
+        }
+    }
+    
+    private User getUserById(int userId) {
+        List<User> allUsers = rmiClient.getAllUsers();
+        for (User user : allUsers) {
+            if (user.getId() == userId) {
+                return user;
+            }
+        }
+        return null;
     }
     
     private void setupWorkingHoursTable() {
@@ -74,13 +125,13 @@ public class DentistDashboardController extends BaseDashboardController implemen
             dayColumn.setCellValueFactory(new PropertyValueFactory<>("dayOfWeek"));
             startColumn.setCellValueFactory(cellData -> {
                 LocalTime startTime = cellData.getValue().getStartTime();
-                return new javafx.beans.property.SimpleStringProperty(
+                return new SimpleStringProperty(
                     startTime != null ? startTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
                 );
             });
             endColumn.setCellValueFactory(cellData -> {
                 LocalTime endTime = cellData.getValue().getEndTime();
-                return new javafx.beans.property.SimpleStringProperty(
+                return new SimpleStringProperty(
                     endTime != null ? endTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
                 );
             });
@@ -98,6 +149,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
             
             loadDentistProfile();
             loadWorkingHours();
+            loadUpcomingAppointments();
         }
     }
     
@@ -120,6 +172,21 @@ public class DentistDashboardController extends BaseDashboardController implemen
             List<WorkingHours> hours = rmiClient.getWorkingHours(currentUser.getId());
             workingHoursList.clear();
             workingHoursList.addAll(hours);
+        }
+    }
+    
+    private void loadUpcomingAppointments() {
+        if (currentUser != null) {
+            List<Appointment> appointments = rmiClient.getDentistAppointments(currentUser.getId());
+            upcomingAppointments.clear();
+            
+            // Filter only upcoming appointments (future appointments)
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            for (Appointment appointment : appointments) {
+                if (appointment.getAppointmentTime().isAfter(now) && !"cancelled".equals(appointment.getStatus())) {
+                    upcomingAppointments.add(appointment);
+                }
+            }
         }
     }
 
