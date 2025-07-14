@@ -5,12 +5,30 @@ import model.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class UserDAO {
     private DatabaseConnector dbConnector;
     
     public UserDAO() {
         this.dbConnector = new DatabaseConnector();
+    }
+    
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
     }
     
     public User validateLogin(String email, String password) {
@@ -20,7 +38,7 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, email);
-            stmt.setString(2, password);
+            stmt.setString(2, hashPassword(password));
             
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -47,7 +65,7 @@ public class UserDAO {
         try (Connection conn = dbConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, user.getPassword());
+            stmt.setString(1, hashPassword(user.getPassword()));
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());

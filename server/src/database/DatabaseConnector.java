@@ -88,6 +88,19 @@ public class DatabaseConnector {
             }
             
             try (Statement stmt = viabookConn.createStatement()) {
+                stmt.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS blocked_slots (
+                        id SERIAL PRIMARY KEY,
+                        dentist_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        blocked_time TIMESTAMP NOT NULL,
+                        reason VARCHAR(255),
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                """);
+                System.out.println("blocked_slots table created (or already exists)");
+            }
+            
+            try (Statement stmt = viabookConn.createStatement()) {
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)");
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_dentist_profiles_user_id ON dentist_profiles(user_id)");
@@ -97,16 +110,15 @@ public class DatabaseConnector {
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status)");
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_working_hours_dentist_id ON working_hours(dentist_id)");
                 stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_working_hours_day ON working_hours(day_of_week)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_blocked_slots_dentist_id ON blocked_slots(dentist_id)");
+                stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_blocked_slots_time ON blocked_slots(blocked_time)");
                 System.out.println("Database indexes created (or already exist)");
             }
             
             try (Statement stmt = viabookConn.createStatement()) {
-                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'test@test.com'");
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'patient@patient.com'");
                 rs.next();
-                if (rs.getInt(1) == 0) {
-                    stmt.executeUpdate("INSERT INTO users (email, password, first_name, last_name, role) VALUES ('test@test.com', 'test', 'Test', 'User', 'patient')");
-                    System.out.println("Default test user inserted");
-                }
+                // Default user ekleme kodu kaldırıldı
             }
             
             viabookConn.close();
