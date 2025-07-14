@@ -27,6 +27,18 @@
     -fx-background-color: #357ab8;
 }
 
+.register-button {
+    -fx-background-color: #43cea2;
+    -fx-text-fill: white;
+    -fx-background-radius: 6px;
+    -fx-font-size: 14px;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    -fx-cursor: hand;
+}
+.register-button:hover {
+    -fx-background-color: #369b7d;
+}
+
 .table-view .column-header-background {
     -fx-background-color: #e3eaf2;
 }
