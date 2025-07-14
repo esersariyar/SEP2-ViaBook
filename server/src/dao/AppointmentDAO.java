@@ -18,14 +18,22 @@ public class AppointmentDAO {
         String sql = "INSERT INTO appointments (patient_id, dentist_id, appointment_time, status) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = dbConnector.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, appointment.getPatientId());
             stmt.setInt(2, appointment.getDentistId());
             stmt.setTimestamp(3, Timestamp.valueOf(appointment.getAppointmentTime()));
             stmt.setString(4, appointment.getStatus());
-            
-            return stmt.executeUpdate() > 0;
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        appointment.setId(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
         } catch (SQLException e) {
             System.err.println("Error creating appointment: " + e.getMessage());
             return false;

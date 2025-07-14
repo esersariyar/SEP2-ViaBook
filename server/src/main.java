@@ -23,7 +23,37 @@ public class Main {
             System.out.println("ViaBook Server is running!");
             System.out.println("UserService bound to RMI registry");
             System.out.println("Waiting for client connections...");
-            
+
+            // --- DEMO USERS ---
+            dao.UserDAO userDAO = new dao.UserDAO();
+            java.util.List<model.User> allUsers = userDAO.getAllUsers();
+            String[][] demoUsers = {
+                {"bob@example.com", "Bob", "Smith", "patient"},
+                {"wendy@example.com", "Wendy", "Brown", "patient"},
+                {"eser@example.com", "Eser", "Sariyar", "secretary"},
+                {"john@example.com", "John", "Doe", "dentist"}
+            };
+            String defaultPassword = "password";
+            for (String[] demo : demoUsers) {
+                boolean exists = allUsers.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(demo[0]));
+                if (!exists) {
+                    model.User user = new model.User(defaultPassword, demo[0], demo[1], demo[2], demo[3]);
+                    userDAO.createUser(user);
+                    System.out.println("Demo user created: " + demo[1] + " (" + demo[3] + ")");
+                }
+            }
+            // --- DEMO USERS ---
+
+            // --- THREAD DEMO ---
+            java.util.concurrent.BlockingQueue<model.Appointment> queue = new java.util.concurrent.LinkedBlockingQueue<>();
+            int dentistCount = 5;
+            int patientCount = 10;
+            service.AppointmentProducer producer = new service.AppointmentProducer(queue, dentistCount, patientCount);
+            service.SecretaryConsumer consumer = new service.SecretaryConsumer(queue);
+            producer.start();
+            consumer.start();
+            // --- THREAD DEMO ---
+
             // Keep server running
             Thread.currentThread().join();
             

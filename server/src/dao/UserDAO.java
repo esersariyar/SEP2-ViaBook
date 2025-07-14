@@ -137,4 +137,28 @@ public class UserDAO {
             return false;
         }
     }
+
+    public List<User> getUsersByRole(String role) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE role = ?";
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, role);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setPassword(rs.getString("password"));
+                user.setEmail(rs.getString("email"));
+                user.setFirstName(rs.getString("first_name"));
+                user.setLastName(rs.getString("last_name"));
+                user.setRole(rs.getString("role"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting users by role: " + e.getMessage());
+        }
+        return users;
+    }
 } 

@@ -118,7 +118,6 @@ public class DatabaseConnector {
             try (Statement stmt = viabookConn.createStatement()) {
                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'patient@patient.com'");
                 rs.next();
-                // Default user ekleme kodu kaldırıldı
             }
             
             viabookConn.close();

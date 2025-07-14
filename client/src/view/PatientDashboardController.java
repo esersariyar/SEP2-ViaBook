@@ -21,6 +21,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 public class PatientDashboardController extends BaseDashboardController implements Initializable {
     @FXML private Button logoutButton;
@@ -58,7 +63,6 @@ public class PatientDashboardController extends BaseDashboardController implemen
         setupUpcomingAppointmentsTable();
         setupPastAppointmentsTable();
         loadDentists();
-        
         if (timeSlotsList != null) {
             timeSlotsList.setItems(availableTimeSlots);
         }

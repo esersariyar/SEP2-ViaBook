@@ -74,6 +74,9 @@
                             </Tab>
                             <Tab text="Upcoming Appointments">
                                 <VBox spacing="8" style="-fx-padding: 8;">
+                                    <HBox spacing="8">
+                                        <Button text="Refresh" fx:id="refreshAppointmentsButton" onAction="#handleRefreshAppointments" />
+                                    </HBox>
                                     <TableView fx:id="upcomingAppointmentsTable" prefHeight="200">
                                         <columns>
                                             <TableColumn text="Date" prefWidth="120" />

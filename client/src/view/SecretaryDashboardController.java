@@ -15,6 +15,11 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 public class SecretaryDashboardController extends BaseDashboardController implements Initializable {
     @FXML private Button logoutButton;

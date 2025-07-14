@@ -27,6 +27,11 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 public class DentistDashboardController extends BaseDashboardController implements Initializable {
     @FXML private Button logoutButton;
@@ -47,6 +52,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
     @FXML private Button deleteWorkingHoursButton;
     
     @FXML private TableView<Appointment> upcomingAppointmentsTable;
+    @FXML private Button refreshAppointmentsButton;
     
     @FXML private DatePicker slotDatePicker;
     @FXML private ListView availableSlotsList;
@@ -60,6 +66,8 @@ public class DentistDashboardController extends BaseDashboardController implemen
     private ObservableList<String> availableSlots = FXCollections.observableArrayList();
     private BlockedSlot selectedBlockedSlot;
     private java.util.Map<String, Integer> blockedSlotMap = new java.util.HashMap<>();
+    private List<User> cachedUsers = null;
+    private java.util.Map<Integer, User> userMap = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -118,14 +126,19 @@ public class DentistDashboardController extends BaseDashboardController implemen
         }
     }
     
-    private User getUserById(int userId) {
-        List<User> allUsers = rmiClient.getAllUsers();
-        for (User user : allUsers) {
-            if (user.getId() == userId) {
-                return user;
-            }
+    private void cacheUsers() {
+        cachedUsers = rmiClient.getAllUsers();
+        userMap = new java.util.HashMap<>();
+        for (User user : cachedUsers) {
+            userMap.put(user.getId(), user);
         }
-        return null;
+    }
+    
+    private User getUserById(int userId) {
+        if (userMap == null) {
+            cacheUsers();
+        }
+        return userMap.get(userId);
     }
     
     private void setupWorkingHoursTable() {
@@ -191,8 +204,7 @@ public class DentistDashboardController extends BaseDashboardController implemen
         if (currentUser != null) {
             List<Appointment> appointments = rmiClient.getDentistAppointments(currentUser.getId());
             upcomingAppointments.clear();
-            
-            // Filter only upcoming appointments (future appointments)
+            cacheUsers(); // Update user cache on each load
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
             for (Appointment appointment : appointments) {
                 if (appointment.getAppointmentTime().isAfter(now) && !"cancelled".equals(appointment.getStatus())) {
@@ -485,5 +497,10 @@ public class DentistDashboardController extends BaseDashboardController implemen
         } else {
             showAlert("Info", "Please select a blocked slot to unblock.");
         }
+    }
+
+    @FXML
+    private void handleRefreshAppointments() {
+        loadUpcomingAppointments();
     }
 } 
