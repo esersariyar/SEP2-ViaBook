@@ -105,13 +105,6 @@
                         
                         <Separator />
                         
-                        <VBox spacing="8">
-                            <Label text="Custom Block:" />
-                            <HBox spacing="4">
-                                <TextField fx:id="customBlockTimeField" prefWidth="80" promptText="14:30" />
-                                <Button text="Block" fx:id="customBlockButton" prefWidth="60" onAction="#handleCustomBlock" />
-                            </HBox>
-                        </VBox>
                     </VBox>
                 </HBox>
             </content>

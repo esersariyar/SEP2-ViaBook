@@ -16,12 +16,16 @@ import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
 import model.Appointment;
+import model.BlockedSlot;
 import service.RMIClient;
 import java.net.URL;
 import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class DentistDashboardController extends BaseDashboardController implements Initializable {
@@ -48,13 +52,14 @@ public class DentistDashboardController extends BaseDashboardController implemen
     @FXML private ListView availableSlotsList;
     @FXML private Button blockSlotButton;
     @FXML private Button unblockSlotButton;
-    @FXML private TextField customBlockTimeField;
-    @FXML private Button customBlockButton;
     
     private User currentUser;
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<WorkingHours> workingHoursList = FXCollections.observableArrayList();
     private ObservableList<Appointment> upcomingAppointments = FXCollections.observableArrayList();
+    private ObservableList<String> availableSlots = FXCollections.observableArrayList();
+    private BlockedSlot selectedBlockedSlot;
+    private java.util.Map<String, Integer> blockedSlotMap = new java.util.HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -67,6 +72,13 @@ public class DentistDashboardController extends BaseDashboardController implemen
         
         setupWorkingHoursTable();
         setupUpcomingAppointmentsTable();
+        setupSlotManagement();
+    }
+    
+    private void setupSlotManagement() {
+        if (availableSlotsList != null) {
+            availableSlotsList.setItems(availableSlots);
+        }
     }
     
     private void setupUpcomingAppointmentsTable() {
@@ -335,31 +347,143 @@ public class DentistDashboardController extends BaseDashboardController implemen
     
     @FXML
     private void handleSlotDateSelection() {
-        // TODO: Implement slot date selection logic
-        System.out.println("Slot date selected");
+        LocalDate selectedDate = slotDatePicker.getValue();
+        if (selectedDate != null && currentUser != null) {
+            loadAvailableSlotsForDate(selectedDate);
+        }
+    }
+    
+    private void loadAvailableSlotsForDate(LocalDate date) {
+        availableSlots.clear();
+        blockedSlotMap.clear();
+        if (date.isBefore(LocalDate.now())) {
+            availableSlots.add("Cannot manage slots for past dates");
+            return;
+        }
+        String dayOfWeek = date.getDayOfWeek().toString();
+        dayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
+        List<WorkingHours> workingHoursList = rmiClient.getWorkingHours(currentUser.getId());
+        WorkingHours workingHoursForDay = null;
+        for (WorkingHours wh : workingHoursList) {
+            if (wh.getDayOfWeek().equals(dayOfWeek)) {
+                workingHoursForDay = wh;
+                break;
+            }
+        }
+        if (workingHoursForDay == null) {
+            availableSlots.add("No working hours set for " + dayOfWeek);
+            return;
+        }
+        // Get blocked slots for the day
+        List<BlockedSlot> blockedSlots = rmiClient.getBlockedSlots(currentUser.getId());
+        java.util.Set<String> blockedTimes = new java.util.HashSet<>();
+        for (BlockedSlot bs : blockedSlots) {
+            if (bs.getBlockedTime().toLocalDate().equals(date)) {
+                String timeStr = bs.getBlockedTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+                blockedTimes.add(timeStr);
+                blockedSlotMap.put(timeStr, bs.getId());
+            }
+        }
+        LocalTime startTime = workingHoursForDay.getStartTime();
+        LocalTime endTime = workingHoursForDay.getEndTime();
+        List<String> timeSlots = new ArrayList<>();
+        LocalTime currentTime = startTime;
+        while (currentTime.isBefore(endTime)) {
+            String timeStr = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            LocalDateTime appointmentDateTime = LocalDateTime.of(date, currentTime);
+            if (blockedTimes.contains(timeStr)) {
+                timeSlots.add(timeStr + " - Blocked");
+            } else if (rmiClient.isTimeSlotAvailable(currentUser.getId(), appointmentDateTime)) {
+                timeSlots.add(timeStr + " - Available");
+            } else {
+                timeSlots.add(timeStr + " - Booked");
+            }
+            currentTime = currentTime.plusMinutes(30);
+        }
+        if (timeSlots.isEmpty()) {
+            availableSlots.add("No time slots available");
+        } else {
+            availableSlots.addAll(timeSlots);
+        }
     }
     
     @FXML
     private void handleSlotSelection(MouseEvent event) {
-        // TODO: Implement slot selection logic
-        System.out.println("Slot selected");
+        Object selectedItem = availableSlotsList.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            String selectedSlot = selectedItem.toString();
+            if (selectedSlot.contains("Available")) {
+                System.out.println("Selected available slot: " + selectedSlot);
+            }
+        }
     }
     
     @FXML
     private void handleBlockSlot() {
-        // TODO: Implement block slot functionality
-        System.out.println("Block slot clicked");
+        Object selectedItem = availableSlotsList.getSelectionModel().getSelectedItem();
+        LocalDate selectedDate = slotDatePicker.getValue();
+        
+        if (selectedItem == null) {
+            showAlert("Error", "Please select a slot to block");
+            return;
+        }
+        
+        String selectedSlot = selectedItem.toString();
+        if (!selectedSlot.contains("Available")) {
+            showAlert("Error", "Please select an available slot to block");
+            return;
+        }
+        
+        if (selectedDate == null) {
+            showAlert("Error", "Please select a date");
+            return;
+        }
+        
+        // Parse selected time
+        String timeStr = selectedSlot.split(" - ")[0];
+        LocalTime selectedTime;
+        try {
+            selectedTime = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (Exception e) {
+            showAlert("Error", "Invalid time format");
+            return;
+        }
+        
+        LocalDateTime blockedDateTime = LocalDateTime.of(selectedDate, selectedTime);
+        BlockedSlot blockedSlot = new BlockedSlot(currentUser.getId(), blockedDateTime, "Blocked by dentist");
+        
+        if (rmiClient.createBlockedSlot(blockedSlot)) {
+            showAlert("Success", "Slot blocked successfully");
+            loadAvailableSlotsForDate(selectedDate);
+        } else {
+            showAlert("Error", "Failed to block slot");
+        }
     }
-    
+
     @FXML
     private void handleUnblockSlot() {
-        // TODO: Implement unblock slot functionality
-        System.out.println("Unblock slot clicked");
-    }
-    
-    @FXML
-    private void handleCustomBlock() {
-        // TODO: Implement custom block functionality
-        System.out.println("Custom block clicked");
+        Object selectedItem = availableSlotsList.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            String selectedSlot = selectedItem.toString();
+            if (selectedSlot.contains("Blocked")) {
+                String timeStr = selectedSlot.split(" - ")[0];
+                Integer blockedSlotId = blockedSlotMap.get(timeStr);
+                if (blockedSlotId != null) {
+                    if (rmiClient.deleteBlockedSlot(blockedSlotId)) {
+                        showAlert("Success", "Slot unblocked successfully");
+                        LocalDate selectedDate = slotDatePicker.getValue();
+                        if (selectedDate != null) {
+                            loadAvailableSlotsForDate(selectedDate);
+                        }
+                    } else {
+                        showAlert("Error", "Failed to unblock slot");
+                    }
+                }
+            } else {
+                showAlert("Info", "Please select a blocked slot to unblock.");
+            }
+        } else {
+            showAlert("Info", "Please select a blocked slot to unblock.");
+        }
     }
 } 

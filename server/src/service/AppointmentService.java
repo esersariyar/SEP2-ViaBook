@@ -59,4 +59,12 @@ public class AppointmentService {
         
         return appointmentDAO.isTimeSlotAvailable(dentistId, appointmentTime);
     }
+
+    public List<Appointment> getPastAppointmentsByPatientId(int patientId) {
+        return appointmentDAO.getPastAppointmentsByPatientId(patientId);
+    }
+
+    public List<Appointment> getPastAppointmentsByDentistId(int dentistId) {
+        return appointmentDAO.getPastAppointmentsByDentistId(dentistId);
+    }
 } 

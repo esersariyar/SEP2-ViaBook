@@ -7,6 +7,7 @@ import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
 import model.Appointment;
+import model.BlockedSlot;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -264,5 +265,73 @@ public class RMIClient {
     
     public UserServiceInterface getUserService() {
         return userService;
+    }
+    
+    public boolean createBlockedSlot(BlockedSlot blockedSlot) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.createBlockedSlot(blockedSlot);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Create blocked slot failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public List<BlockedSlot> getBlockedSlots(int dentistId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        
+        try {
+            return userService.getBlockedSlots(dentistId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get blocked slots failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    public boolean deleteBlockedSlot(int blockedSlotId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.deleteBlockedSlot(blockedSlotId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Delete blocked slot failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<Appointment> getPastAppointmentsByPatientId(int patientId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        try {
+            return userService.getPastAppointmentsByPatientId(patientId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get past patient appointments failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Appointment> getPastAppointmentsByDentistId(int dentistId) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return new ArrayList<>();
+        }
+        try {
+            return userService.getPastAppointmentsByDentistId(dentistId);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Get past dentist appointments failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 } 

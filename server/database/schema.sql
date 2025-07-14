@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS working_hours CASCADE;
 DROP TABLE IF EXISTS appointments CASCADE;
 DROP TABLE IF EXISTS dentist_profiles CASCADE;
+DROP TABLE IF EXISTS blocked_slots CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
@@ -48,6 +49,16 @@ CREATE TABLE working_hours (
     UNIQUE(dentist_id, day_of_week)
 );
 
+CREATE TABLE blocked_slots (
+    id SERIAL PRIMARY KEY,
+    dentist_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    blocked_time TIMESTAMP NOT NULL,
+    reason VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT blocked_slots_dentist_role_check 
+        CHECK ((SELECT role FROM users WHERE id = dentist_id) = 'dentist')
+);
+
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_dentist_profiles_user_id ON dentist_profiles(user_id);
@@ -56,4 +67,6 @@ CREATE INDEX idx_appointments_dentist_id ON appointments(dentist_id);
 CREATE INDEX idx_appointments_time ON appointments(appointment_time);
 CREATE INDEX idx_appointments_status ON appointments(status);
 CREATE INDEX idx_working_hours_dentist_id ON working_hours(dentist_id);
-CREATE INDEX idx_working_hours_day ON working_hours(day_of_week); 
+CREATE INDEX idx_working_hours_day ON working_hours(day_of_week);
+CREATE INDEX idx_blocked_slots_dentist_id ON blocked_slots(dentist_id);
+CREATE INDEX idx_blocked_slots_time ON blocked_slots(blocked_time); 

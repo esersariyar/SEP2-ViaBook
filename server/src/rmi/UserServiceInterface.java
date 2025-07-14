@@ -4,6 +4,7 @@ import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
 import model.Appointment;
+import model.BlockedSlot;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
@@ -44,4 +45,13 @@ public interface UserServiceInterface extends Remote {
     boolean updateAppointmentStatus(int appointmentId, String status) throws RemoteException;
     
     boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) throws RemoteException;
+    
+    boolean createBlockedSlot(BlockedSlot blockedSlot) throws RemoteException;
+    
+    List<BlockedSlot> getBlockedSlots(int dentistId) throws RemoteException;
+    
+    boolean deleteBlockedSlot(int blockedSlotId) throws RemoteException;
+    
+    List<Appointment> getPastAppointmentsByPatientId(int patientId) throws RemoteException;
+    List<Appointment> getPastAppointmentsByDentistId(int dentistId) throws RemoteException;
 } 

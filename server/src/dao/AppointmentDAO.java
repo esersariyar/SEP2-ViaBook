@@ -121,4 +121,52 @@ public class AppointmentDAO {
         
         return false;
     }
+
+    public List<Appointment> getPastAppointmentsByPatientId(int patientId) {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = "SELECT * FROM appointments WHERE patient_id = ? AND appointment_time < ? ORDER BY appointment_time DESC";
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Appointment appointment = new Appointment();
+                appointment.setId(rs.getInt("id"));
+                appointment.setPatientId(rs.getInt("patient_id"));
+                appointment.setDentistId(rs.getInt("dentist_id"));
+                appointment.setAppointmentTime(rs.getTimestamp("appointment_time").toLocalDateTime());
+                appointment.setStatus(rs.getString("status"));
+                appointment.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                appointments.add(appointment);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting past appointments by patient: " + e.getMessage());
+        }
+        return appointments;
+    }
+
+    public List<Appointment> getPastAppointmentsByDentistId(int dentistId) {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = "SELECT * FROM appointments WHERE dentist_id = ? AND appointment_time < ? ORDER BY appointment_time DESC";
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, dentistId);
+            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Appointment appointment = new Appointment();
+                appointment.setId(rs.getInt("id"));
+                appointment.setPatientId(rs.getInt("patient_id"));
+                appointment.setDentistId(rs.getInt("dentist_id"));
+                appointment.setAppointmentTime(rs.getTimestamp("appointment_time").toLocalDateTime());
+                appointment.setStatus(rs.getString("status"));
+                appointment.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                appointments.add(appointment);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting past appointments by dentist: " + e.getMessage());
+        }
+        return appointments;
+    }
 } 

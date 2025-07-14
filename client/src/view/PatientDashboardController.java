@@ -50,11 +50,13 @@ public class PatientDashboardController extends BaseDashboardController implemen
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<String> availableTimeSlots = FXCollections.observableArrayList();
     private ObservableList<Appointment> upcomingAppointments = FXCollections.observableArrayList();
+    private ObservableList<Appointment> pastAppointments = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupDentistTable();
         setupUpcomingAppointmentsTable();
+        setupPastAppointmentsTable();
         loadDentists();
         
         if (timeSlotsList != null) {
@@ -102,6 +104,46 @@ public class PatientDashboardController extends BaseDashboardController implemen
             actionsColumn.setCellValueFactory(cellData -> new SimpleStringProperty("Cancel"));
             
             upcomingAppointmentsTable.setItems(upcomingAppointments);
+        }
+    }
+    
+    private void setupPastAppointmentsTable() {
+        if (pastAppointmentsTable != null && pastAppointmentsTable.getColumns().size() >= 4) {
+            TableColumn<Appointment, String> dateColumn = (TableColumn<Appointment, String>) pastAppointmentsTable.getColumns().get(0);
+            TableColumn<Appointment, String> timeColumn = (TableColumn<Appointment, String>) pastAppointmentsTable.getColumns().get(1);
+            TableColumn<Appointment, String> dentistColumn = (TableColumn<Appointment, String>) pastAppointmentsTable.getColumns().get(2);
+            TableColumn<Appointment, String> statusColumn = (TableColumn<Appointment, String>) pastAppointmentsTable.getColumns().get(3);
+
+            dateColumn.setCellValueFactory(cellData -> {
+                LocalDateTime appointmentTime = cellData.getValue().getAppointmentTime();
+                return new SimpleStringProperty(
+                    appointmentTime != null ? appointmentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : ""
+                );
+            });
+
+            timeColumn.setCellValueFactory(cellData -> {
+                LocalDateTime appointmentTime = cellData.getValue().getAppointmentTime();
+                return new SimpleStringProperty(
+                    appointmentTime != null ? appointmentTime.format(DateTimeFormatter.ofPattern("HH:mm")) : ""
+                );
+            });
+
+            dentistColumn.setCellValueFactory(cellData -> {
+                int dentistId = cellData.getValue().getDentistId();
+                User dentist = getUserById(dentistId);
+                return new SimpleStringProperty(
+                    dentist != null ? "Dr. " + dentist.getFirstName() + " " + dentist.getLastName() : "Unknown"
+                );
+            });
+
+            statusColumn.setCellValueFactory(cellData -> {
+                String status = cellData.getValue().getStatus();
+                return new SimpleStringProperty(
+                    status != null ? status.substring(0, 1).toUpperCase() + status.substring(1) : "Unknown"
+                );
+            });
+
+            pastAppointmentsTable.setItems(pastAppointments);
         }
     }
     
@@ -192,6 +234,14 @@ public class PatientDashboardController extends BaseDashboardController implemen
         }
     }
 
+    private void loadPastAppointments() {
+        if (currentUser != null) {
+            List<Appointment> appointments = rmiClient.getPastAppointmentsByPatientId(currentUser.getId());
+            pastAppointments.clear();
+            pastAppointments.addAll(appointments);
+        }
+    }
+
     public void setUser(User user) {
         if (user != null) {
             nameLabel.setText(user.getFirstName());
@@ -205,6 +255,7 @@ public class PatientDashboardController extends BaseDashboardController implemen
             
             // Load user's appointments
             loadUpcomingAppointments();
+            loadPastAppointments();
         }
     }
 

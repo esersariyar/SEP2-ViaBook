@@ -5,6 +5,7 @@ import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
 import model.Appointment;
+import model.BlockedSlot;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
@@ -204,6 +205,58 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
         } catch (Exception e) {
             System.err.println("ViaBook Server: Check time slot availability error: " + e.getMessage());
             throw new RemoteException("Check time slot availability failed", e);
+        }
+    }
+    
+    @Override
+    public boolean createBlockedSlot(BlockedSlot blockedSlot) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Create blocked slot attempt for dentist ID: " + blockedSlot.getDentistId());
+            return userService.createBlockedSlot(blockedSlot);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Create blocked slot error: " + e.getMessage());
+            throw new RemoteException("Create blocked slot failed", e);
+        }
+    }
+    
+    @Override
+    public List<BlockedSlot> getBlockedSlots(int dentistId) throws RemoteException {
+        try {
+            return userService.getBlockedSlots(dentistId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get blocked slots error: " + e.getMessage());
+            throw new RemoteException("Get blocked slots failed", e);
+        }
+    }
+    
+    @Override
+    public boolean deleteBlockedSlot(int blockedSlotId) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Delete blocked slot attempt - ID: " + blockedSlotId);
+            return userService.deleteBlockedSlot(blockedSlotId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Delete blocked slot error: " + e.getMessage());
+            throw new RemoteException("Delete blocked slot failed", e);
+        }
+    }
+
+    @Override
+    public List<Appointment> getPastAppointmentsByPatientId(int patientId) throws RemoteException {
+        try {
+            return userService.getPastAppointmentsByPatientId(patientId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get past patient appointments error: " + e.getMessage());
+            throw new RemoteException("Get past patient appointments failed", e);
+        }
+    }
+
+    @Override
+    public List<Appointment> getPastAppointmentsByDentistId(int dentistId) throws RemoteException {
+        try {
+            return userService.getPastAppointmentsByDentistId(dentistId);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Get past dentist appointments error: " + e.getMessage());
+            throw new RemoteException("Get past dentist appointments failed", e);
         }
     }
 } 

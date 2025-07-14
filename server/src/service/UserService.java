@@ -3,10 +3,12 @@ package service;
 import dao.UserDAO;
 import dao.DentistProfileDAO;
 import dao.WorkingHoursDAO;
+import dao.BlockedSlotDAO;
 import model.User;
 import model.DentistProfile;
 import model.WorkingHours;
 import model.Appointment;
+import model.BlockedSlot;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,12 +16,14 @@ public class UserService {
     private UserDAO userDAO;
     private DentistProfileDAO dentistProfileDAO;
     private WorkingHoursDAO workingHoursDAO;
+    private BlockedSlotDAO blockedSlotDAO;
     private AppointmentService appointmentService;
     
     public UserService() {
         this.userDAO = new UserDAO();
         this.dentistProfileDAO = new DentistProfileDAO();
         this.workingHoursDAO = new WorkingHoursDAO();
+        this.blockedSlotDAO = new BlockedSlotDAO();
         this.appointmentService = new AppointmentService();
     }
     
@@ -124,6 +128,35 @@ public class UserService {
     }
     
     public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
+        // Check if the time slot is blocked
+        if (blockedSlotDAO.isTimeSlotBlocked(dentistId, appointmentTime)) {
+            return false;
+        }
+        
         return appointmentService.isTimeSlotAvailable(dentistId, appointmentTime);
+    }
+    
+    public boolean createBlockedSlot(BlockedSlot blockedSlot) {
+        if (blockedSlot == null || blockedSlot.getDentistId() <= 0 || blockedSlot.getBlockedTime() == null) {
+            return false;
+        }
+        
+        return blockedSlotDAO.createBlockedSlot(blockedSlot);
+    }
+    
+    public List<BlockedSlot> getBlockedSlots(int dentistId) {
+        return blockedSlotDAO.getBlockedSlotsByDentistId(dentistId);
+    }
+    
+    public boolean deleteBlockedSlot(int blockedSlotId) {
+        return blockedSlotDAO.deleteBlockedSlot(blockedSlotId);
+    }
+
+    public List<Appointment> getPastAppointmentsByPatientId(int patientId) {
+        return appointmentService.getPastAppointmentsByPatientId(patientId);
+    }
+
+    public List<Appointment> getPastAppointmentsByDentistId(int dentistId) {
+        return appointmentService.getPastAppointmentsByDentistId(dentistId);
     }
 } 
