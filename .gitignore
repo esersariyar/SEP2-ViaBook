@@ -6,7 +6,7 @@ Document/
 
 # Build artifacts
 *.class
-*.jar
+# *.jar
 out/
 target/
 
