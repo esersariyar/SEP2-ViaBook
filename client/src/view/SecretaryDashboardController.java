@@ -20,6 +20,9 @@ import javafx.animation.Timeline;
 import javafx.util.Duration;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
 
 public class SecretaryDashboardController extends BaseDashboardController implements Initializable {
     @FXML private Button logoutButton;
@@ -44,6 +47,8 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     @FXML private Button saveDentistButton;
     @FXML private Button cancelButton;
     @FXML private TableView<User> dentistsTable;
+    
+    @FXML private Button exportButton;
     
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<Appointment> pendingAppointments = FXCollections.observableArrayList();
@@ -380,5 +385,33 @@ public class SecretaryDashboardController extends BaseDashboardController implem
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleExport() {
+        LocalDate today = LocalDate.now();
+        String fileName = "daily_schedule_" + today.toString().replace("-", "") + ".csv";
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write("Date,Time,Patient,Dentist,Status\n");
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            for (Appointment appointment : allAppointments) {
+                if (appointment.getAppointmentTime().toLocalDate().equals(today)) {
+                    User patient = getUserById(appointment.getPatientId());
+                    User dentist = getUserById(appointment.getDentistId());
+                    String line = String.format("%s,%s,%s,%s,%s\n",
+                        appointment.getAppointmentTime().format(dateFormatter),
+                        appointment.getAppointmentTime().format(timeFormatter),
+                        patient != null ? patient.getFirstName() + " " + patient.getLastName() : "Unknown",
+                        dentist != null ? "Dr. " + dentist.getFirstName() + " " + dentist.getLastName() : "Unknown",
+                        appointment.getStatus()
+                    );
+                    writer.write(line);
+                }
+            }
+            showAlert("Success", "Daily schedule exported to " + fileName);
+        } catch (IOException e) {
+            showAlert("Error", "Failed to export schedule: " + e.getMessage());
+        }
     }
 } 
