@@ -48,6 +48,8 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     private RMIClient rmiClient = new RMIClient();
     private ObservableList<Appointment> pendingAppointments = FXCollections.observableArrayList();
     private ObservableList<Appointment> allAppointments = FXCollections.observableArrayList();
+    private List<User> cachedUsers = null;
+    private java.util.Map<Integer, User> userMap = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -156,14 +158,19 @@ public class SecretaryDashboardController extends BaseDashboardController implem
         }
     }
     
-    private User getUserById(int userId) {
-        List<User> allUsers = rmiClient.getAllUsers();
-        for (User user : allUsers) {
-            if (user.getId() == userId) {
-                return user;
-            }
+    private void cacheUsers() {
+        cachedUsers = rmiClient.getAllUsers();
+        userMap = new java.util.HashMap<>();
+        for (User user : cachedUsers) {
+            userMap.put(user.getId(), user);
         }
-        return null;
+    }
+
+    private User getUserById(int userId) {
+        if (userMap == null) {
+            cacheUsers();
+        }
+        return userMap.get(userId);
     }
     
     private void setupDentistsTable() {
@@ -200,16 +207,16 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     
     private void loadAllAppointments() {
         // Get all appointments from all dentists
-        List<User> allUsers = rmiClient.getAllUsers();
+        if (userMap == null) {
+            cacheUsers();
+        }
         allAppointments.clear();
-        
-        for (User user : allUsers) {
+        for (User user : cachedUsers) {
             if ("dentist".equals(user.getRole())) {
                 List<Appointment> dentistAppointments = rmiClient.getDentistAppointments(user.getId());
                 allAppointments.addAll(dentistAppointments);
             }
         }
-        
         loadPendingAppointments();
     }
     
@@ -222,6 +229,7 @@ public class SecretaryDashboardController extends BaseDashboardController implem
         if (confirmation.showAndWait().get() == ButtonType.OK) {
             if (rmiClient.deleteUser(dentist.getId())) {
                 showAlert("Success", "Dentist deleted successfully");
+                userMap = null; // cache'i sıfırla
                 loadDentists();
             } else {
                 showAlert("Error", "Failed to delete dentist");
@@ -323,6 +331,7 @@ public class SecretaryDashboardController extends BaseDashboardController implem
             showAlert("Success", "Dentist created successfully");
             clearForm();
             hideForm();
+            userMap = null; // cache'i sıfırla
             loadDentists();
         } else {
             showAlert("Error", "Failed to create dentist");
@@ -336,10 +345,12 @@ public class SecretaryDashboardController extends BaseDashboardController implem
     }
     
     private void loadDentists() {
-        List<User> allUsers = rmiClient.getAllUsers();
+        if (userMap == null) {
+            cacheUsers();
+        }
         ObservableList<User> dentists = FXCollections.observableArrayList();
         
-        for (User user : allUsers) {
+        for (User user : cachedUsers) {
             if ("dentist".equals(user.getRole())) {
                 dentists.add(user);
             }
