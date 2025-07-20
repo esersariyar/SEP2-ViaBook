@@ -50,7 +50,6 @@
                                             <TableColumn text="Time" prefWidth="100" />
                                             <TableColumn text="Dentist" prefWidth="120" />
                                             <TableColumn text="Status" prefWidth="100" />
-                                            <TableColumn text="Actions" prefWidth="100" />
                                         </columns>
                                     </TableView>
                                     <Button text="Cancel Selected" fx:id="cancelAppointmentButton" prefWidth="150" onAction="#handleCancelAppointment" />
