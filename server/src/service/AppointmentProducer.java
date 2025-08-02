@@ -35,7 +35,13 @@ public class AppointmentProducer extends Thread {
             while (true) {
                 User patient = patients.get(random.nextInt(patients.size()));
                 User dentist = dentists.get(random.nextInt(dentists.size()));
-                LocalDateTime appointmentTime = LocalDateTime.now().plusDays(random.nextInt(30)).plusHours(random.nextInt(8) + 8);
+                // Generate appointment time in 30-minute intervals
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime baseTime = now.plusDays(random.nextInt(30)).withHour(8).withMinute(0).withSecond(0).withNano(0);
+                
+                // Random 30-minute slot between 8:00 and 16:00 (8 hours = 16 slots)
+                int slotIndex = random.nextInt(16);
+                LocalDateTime appointmentTime = baseTime.plusMinutes(slotIndex * 30);
                 Appointment appointment = new Appointment(patient.getId(), dentist.getId(), appointmentTime);
                 boolean dbResult = appointmentDAO.createAppointment(appointment);
                 if (dbResult) {
