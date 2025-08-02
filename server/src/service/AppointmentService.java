@@ -49,6 +49,19 @@ public class AppointmentService {
             return false;
         }
         
+        // If cancelling appointment, check 24-hour rule
+        if ("cancelled".equals(status)) {
+            Appointment appointment = appointmentDAO.getAppointmentById(appointmentId);
+            if (appointment != null) {
+                LocalDateTime appointmentTime = appointment.getAppointmentTime();
+                LocalDateTime now = LocalDateTime.now();
+                
+                if (appointmentTime.isBefore(now.plusHours(24))) {
+                    return false; // Cannot cancel within 24 hours
+                }
+            }
+        }
+        
         return appointmentDAO.updateAppointmentStatus(appointmentId, status);
     }
     

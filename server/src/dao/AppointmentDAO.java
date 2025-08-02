@@ -94,6 +94,32 @@ public class AppointmentDAO {
         return appointments;
     }
     
+    public Appointment getAppointmentById(int appointmentId) {
+        String sql = "SELECT * FROM appointments WHERE id = ?";
+        
+        try (Connection conn = dbConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, appointmentId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                Appointment appointment = new Appointment();
+                appointment.setId(rs.getInt("id"));
+                appointment.setPatientId(rs.getInt("patient_id"));
+                appointment.setDentistId(rs.getInt("dentist_id"));
+                appointment.setAppointmentTime(rs.getTimestamp("appointment_time").toLocalDateTime());
+                appointment.setStatus(rs.getString("status"));
+                appointment.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                return appointment;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting appointment by ID: " + e.getMessage());
+        }
+        
+        return null;
+    }
+    
     public boolean updateAppointmentStatus(int appointmentId, String status) {
         String sql = "UPDATE appointments SET status = ? WHERE id = ?";
         

@@ -163,6 +163,15 @@ public class PatientViewModel {
             return false;
         }
         
+        // Check if appointment is within 24 hours
+        LocalDateTime appointmentTime = appointment.getAppointmentTime();
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (appointmentTime.isBefore(now.plusHours(24))) {
+            errorMessage.set("Appointments cannot be cancelled within 24 hours of the appointment time");
+            return false;
+        }
+        
         if (rmiClient.updateAppointmentStatus(appointment.getId(), "cancelled")) {
             errorMessage.set("Appointment cancelled successfully");
             loadUpcomingAppointments();
