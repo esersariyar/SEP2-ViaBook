@@ -172,7 +172,7 @@ public class PatientViewModel {
             return false;
         }
         
-        if (rmiClient.updateAppointmentStatus(appointment.getId(), "cancelled")) {
+        if (rmiClient.updateAppointmentStatusByPatient(appointment.getId(), "cancelled")) {
             errorMessage.set("Appointment cancelled successfully");
             loadUpcomingAppointments();
             return true;

@@ -127,6 +127,10 @@ public class UserService {
         return appointmentService.updateAppointmentStatus(appointmentId, status);
     }
     
+    public boolean updateAppointmentStatusByPatient(int appointmentId, String status) {
+        return appointmentService.updateAppointmentStatusByPatient(appointmentId, status);
+    }
+    
     public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
         // Check if the time slot is blocked
         if (blockedSlotDAO.isTimeSlotBlocked(dentistId, appointmentTime)) {

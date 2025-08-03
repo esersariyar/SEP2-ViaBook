@@ -249,6 +249,20 @@ public class RMIClient {
         }
     }
     
+    public boolean updateAppointmentStatusByPatient(int appointmentId, String status) {
+        if (userService == null) {
+            System.err.println("ViaBook Client: No server connection available");
+            return false;
+        }
+        
+        try {
+            return userService.updateAppointmentStatusByPatient(appointmentId, status);
+        } catch (RemoteException e) {
+            System.err.println("ViaBook Client: Update appointment status by patient failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) {
         if (userService == null) {
             System.err.println("ViaBook Client: No server connection available");

@@ -49,7 +49,20 @@ public class AppointmentService {
             return false;
         }
         
-        // If cancelling appointment, check 24-hour rule
+        return appointmentDAO.updateAppointmentStatus(appointmentId, status);
+    }
+    
+    public boolean updateAppointmentStatusByPatient(int appointmentId, String status) {
+        if (appointmentId <= 0 || status == null || status.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Validate status
+        if (!"pending".equals(status) && !"approved".equals(status) && !"cancelled".equals(status)) {
+            return false;
+        }
+        
+        // If cancelling appointment, check 24-hour rule for patients
         if ("cancelled".equals(status)) {
             Appointment appointment = appointmentDAO.getAppointmentById(appointmentId);
             if (appointment != null) {

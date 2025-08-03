@@ -44,6 +44,8 @@ public interface UserServiceInterface extends Remote {
     
     boolean updateAppointmentStatus(int appointmentId, String status) throws RemoteException;
     
+    boolean updateAppointmentStatusByPatient(int appointmentId, String status) throws RemoteException;
+    
     boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) throws RemoteException;
     
     boolean createBlockedSlot(BlockedSlot blockedSlot) throws RemoteException;

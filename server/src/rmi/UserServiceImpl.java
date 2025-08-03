@@ -199,6 +199,17 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserServiceI
     }
     
     @Override
+    public boolean updateAppointmentStatusByPatient(int appointmentId, String status) throws RemoteException {
+        try {
+            System.out.println("ViaBook Server: Update appointment status by patient attempt - ID: " + appointmentId + ", Status: " + status);
+            return userService.updateAppointmentStatusByPatient(appointmentId, status);
+        } catch (Exception e) {
+            System.err.println("ViaBook Server: Update appointment status by patient error: " + e.getMessage());
+            throw new RemoteException("Update appointment status by patient failed", e);
+        }
+    }
+    
+    @Override
     public boolean isTimeSlotAvailable(int dentistId, LocalDateTime appointmentTime) throws RemoteException {
         try {
             return userService.isTimeSlotAvailable(dentistId, appointmentTime);
