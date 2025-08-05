@@ -1,3 +1,5 @@
+package view;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -6,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.User;
+import viewmodel.LoginViewModel;
 import view.ViewHandler;
 import view.ViewType;
 
