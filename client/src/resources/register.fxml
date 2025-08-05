@@ -13,6 +13,7 @@
                 <ComboBox fx:id="roleComboBox" promptText="Select Role" maxWidth="260" />
                 <PasswordField fx:id="pinField" promptText="PIN (for Dentist/Secretary)" maxWidth="120" visible="false" managed="false" />
                 <Button fx:id="registerButton" text="Register" minWidth="120" onAction="#handleRegister" />
+                <Button fx:id="backToLoginButton" text="Back to Login" minWidth="120" onAction="#handleBackToLogin" styleClass="register-button" />
                 <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 14px;" wrapText="true" minHeight="24" maxWidth="350" alignment="CENTER" visible="true" managed="true" />
             </children>
         </VBox>

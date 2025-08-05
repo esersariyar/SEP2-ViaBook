@@ -17,6 +17,7 @@ public class RegisterController {
     @FXML private ComboBox<String> roleComboBox;
     @FXML private PasswordField pinField;
     @FXML private Button registerButton;
+    @FXML private Button backToLoginButton;
     @FXML private Label errorLabel;
 
     private RMIClient rmiClient = new RMIClient();
@@ -66,5 +67,10 @@ public class RegisterController {
         } else {
             errorLabel.setText("Registration failed. Email may already be in use.");
         }
+    }
+
+    @FXML
+    private void handleBackToLogin() {
+        ViewHandler.getInstance().openView(ViewType.LOGIN);
     }
 } 
