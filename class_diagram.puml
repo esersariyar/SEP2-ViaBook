@@ -1,0 +1,232 @@
+@startuml SEP2_Class_Diagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam backgroundColor white
+skinparam class {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+    FontColor Black
+}
+
+' Model Classes
+class User {
+    -id: int
+    -password: String
+    -email: String
+    -firstName: String
+    -lastName: String
+    -role: String
+    -createdAt: Timestamp
+    --
+    +getId(): int
+    +setId(int)
+    +getPassword(): String
+    +setPassword(String)
+    +getEmail(): String
+    +setEmail(String)
+    +getFirstName(): String
+    +setFirstName(String)
+    +getLastName(): String
+    +setLastName(String)
+    +getRole(): String
+    +setRole(String)
+    +getCreatedAt(): Timestamp
+    +setCreatedAt(Timestamp)
+    +toString(): String
+}
+
+class Appointment {
+    -id: int
+    -patientId: int
+    -dentistId: int
+    -appointmentTime: LocalDateTime
+    -status: String
+    -createdAt: LocalDateTime
+    --
+    +getId(): int
+    +setId(int)
+    +getPatientId(): int
+    +setPatientId(int)
+    +getDentistId(): int
+    +setDentistId(int)
+    +getAppointmentTime(): LocalDateTime
+    +setAppointmentTime(LocalDateTime)
+    +getStatus(): String
+    +setStatus(String)
+    +getCreatedAt(): LocalDateTime
+    +setCreatedAt(LocalDateTime)
+    +toString(): String
+}
+
+class DentistProfile {
+    -id: int
+    -userId: int
+    -description: String
+    -specialization: String
+    --
+    +getId(): int
+    +setId(int)
+    +getUserId(): int
+    +setUserId(int)
+    +getDescription(): String
+    +setDescription(String)
+    +getSpecialization(): String
+    +setSpecialization(String)
+}
+
+class WorkingHours {
+    -id: int
+    -dentistId: int
+    -dayOfWeek: String
+    -startTime: LocalTime
+    -endTime: LocalTime
+    --
+    +getId(): int
+    +setId(int)
+    +getDentistId(): int
+    +setDentistId(int)
+    +getDayOfWeek(): String
+    +setDayOfWeek(String)
+    +getStartTime(): LocalTime
+    +setStartTime(LocalTime)
+    +getEndTime(): LocalTime
+    +setEndTime(LocalTime)
+}
+
+class BlockedSlot {
+    -id: int
+    -dentistId: int
+    -blockedTime: LocalDateTime
+    -reason: String
+    -createdAt: LocalDateTime
+    --
+    +getId(): int
+    +setId(int)
+    +getDentistId(): int
+    +setDentistId(int)
+    +getBlockedTime(): LocalDateTime
+    +setBlockedTime(LocalDateTime)
+    +getReason(): String
+    +setReason(String)
+    +getCreatedAt(): LocalDateTime
+    +setCreatedAt(LocalDateTime)
+    +toString(): String
+}
+
+' ViewModel Classes
+class LoginViewModel {
+    -rmiClient: RMIClient
+    -email: StringProperty
+    -password: StringProperty
+    -errorMessage: StringProperty
+    --
+    +login(): boolean
+    +register(): boolean
+    +getUser(): User
+}
+
+class PatientViewModel {
+    -rmiClient: RMIClient
+    -currentUser: User
+    -selectedDentist: User
+    -selectedDate: LocalDate
+    -selectedTimeSlot: String
+    --
+    +setUser(User)
+    +getDentists(): ObservableList<User>
+    +getAvailableTimeSlots(): ObservableList<String>
+    +createAppointment(): boolean
+    +cancelAppointment(): boolean
+}
+
+class DentistViewModel {
+    -rmiClient: RMIClient
+    -currentUser: User
+    -selectedWorkingHours: WorkingHours
+    -selectedSlotDate: LocalDate
+    --
+    +setUser(User)
+    +getWorkingHoursList(): ObservableList<WorkingHours>
+    +addWorkingHours(): boolean
+    +removeWorkingHours(): boolean
+    +blockTimeSlot(): boolean
+}
+
+class SecretaryViewModel {
+    -rmiClient: RMIClient
+    -selectedStatus: StringProperty
+    -pendingAppointments: ObservableList<Appointment>
+    --
+    +getPendingAppointments(): ObservableList<Appointment>
+    +approveAppointment(): boolean
+    +rejectAppointment(): boolean
+}
+
+' Service Classes
+class RMIClient {
+    -userService: UserServiceInterface
+    --
+    +login(String, String): boolean
+    +register(User): boolean
+    +getUser(int): User
+    +createAppointment(int, int, LocalDateTime): boolean
+    +updateAppointmentStatus(int, String): boolean
+}
+
+class UserServiceInterface {
+    +login(String, String): boolean
+    +register(User): boolean
+    +getUser(int): User
+    +createAppointment(int, int, LocalDateTime): boolean
+    +updateAppointmentStatus(int, String): boolean
+}
+
+class UserServiceImpl {
+    -userDAO: UserDAO
+    -appointmentDAO: AppointmentDAO
+    --
+    +login(String, String): boolean
+    +register(User): boolean
+    +getUser(int): User
+    +createAppointment(int, int, LocalDateTime): boolean
+    +updateAppointmentStatus(int, String): boolean
+}
+
+' DAO Classes
+class UserDAO {
+    -dbConnector: DatabaseConnector
+    --
+    +createUser(User): boolean
+    +getUserByEmail(String): User
+    +getUserById(int): User
+    +getAllUsers(): List<User>
+}
+
+class AppointmentDAO {
+    -dbConnector: DatabaseConnector
+    --
+    +createAppointment(Appointment): boolean
+    +getAppointmentsByPatientId(int): List<Appointment>
+    +getAppointmentsByDentistId(int): List<Appointment>
+    +updateAppointmentStatus(int, String): boolean
+}
+
+' Relationships
+User "1" -- "1" DentistProfile
+User "1" -- "*" Appointment : patient
+User "1" -- "*" Appointment : dentist
+User "1" -- "*" WorkingHours
+User "1" -- "*" BlockedSlot
+
+LoginViewModel "1" -- "1" RMIClient
+PatientViewModel "1" -- "1" RMIClient
+DentistViewModel "1" -- "1" RMIClient
+SecretaryViewModel "1" -- "1" RMIClient
+
+RMIClient "1" -- "1" UserServiceInterface
+UserServiceImpl ..|> UserServiceInterface
+
+UserServiceImpl "1" -- "1" UserDAO
+UserServiceImpl "1" -- "1" AppointmentDAO
+
+@enduml 

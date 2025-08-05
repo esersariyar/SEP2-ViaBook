@@ -6,6 +6,8 @@ import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import service.RMIClient;
+import view.ViewHandler;
+import view.ViewType;
 
 public class RegisterController {
     @FXML private TextField firstNameField;
@@ -60,8 +62,7 @@ public class RegisterController {
             alert.setHeaderText(null);
             alert.setContentText("Registration successful! You can now log in.");
             alert.showAndWait();
-            Stage stage = (Stage) registerButton.getScene().getWindow();
-            stage.close();
+            ViewHandler.getInstance().openView(ViewType.LOGIN);
         } else {
             errorLabel.setText("Registration failed. Email may already be in use.");
         }

@@ -6,6 +6,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.User;
+import view.ViewHandler;
+import view.ViewType;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -48,11 +50,11 @@ public class LoginController implements Initializable {
             viewModel.clearFields();
             if (user != null) {
                 if ("patient".equalsIgnoreCase(user.getRole())) {
-                    openDashboard("patient_dashboard.fxml", "Patient Dashboard");
+                    ViewHandler.getInstance().openView(ViewType.PATIENT_DASHBOARD, user);
                 } else if ("dentist".equalsIgnoreCase(user.getRole())) {
-                    openDashboard("dentist_dashboard.fxml", "Dentist Dashboard");
+                    ViewHandler.getInstance().openView(ViewType.DENTIST_DASHBOARD, user);
                 } else if ("secretary".equalsIgnoreCase(user.getRole())) {
-                    openDashboard("secretary_dashboard.fxml", "Secretary Dashboard");
+                    ViewHandler.getInstance().openView(ViewType.SECRETARY_DASHBOARD, user);
                 } else {
                    Alert alert = new Alert(Alert.AlertType.ERROR);
                    alert.setTitle("Error");
@@ -66,49 +68,6 @@ public class LoginController implements Initializable {
 
     @FXML
     private void handleRegister() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("register.fxml"));
-            Stage stage = new Stage();
-            stage.setTitle("Register");
-            stage.setScene(new Scene(root, 400, 400));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void openDashboard(String fxml, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(fxml));
-            Parent root = loader.load();
-            if ("patient_dashboard.fxml".equals(fxml)) {
-                Object controller = loader.getController();
-                if (controller instanceof view.PatientDashboardController) {
-                    ((view.PatientDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
-                }
-            } else if ("dentist_dashboard.fxml".equals(fxml)) {
-                Object controller = loader.getController();
-                if (controller instanceof view.DentistDashboardController) {
-                    ((view.DentistDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
-                }
-            } else if ("secretary_dashboard.fxml".equals(fxml)) {
-                Object controller = loader.getController();
-                if (controller instanceof view.SecretaryDashboardController) {
-                    ((view.SecretaryDashboardController) controller).setUser(viewModel.getAuthenticatedUser());
-                }
-            }
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
-            Stage stage = new Stage();
-            stage.setTitle(title);
-            stage.setScene(scene);
-            stage.setMinWidth(900);
-            stage.setMinHeight(600);
-            stage.show();
-            Stage currentStage = (Stage) loginButton.getScene().getWindow();
-            currentStage.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ViewHandler.getInstance().openView(ViewType.REGISTER);
     }
 } 

@@ -3,21 +3,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import view.ViewHandler;
+import view.ViewType;
 
 public class Main extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("resources/login.fxml"));
-        Scene scene = new Scene(root, 500, 400);
-        scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
-        
-        primaryStage.setTitle("ViaBook");
-        primaryStage.setScene(scene);
-        primaryStage.setMinWidth(900);
-        primaryStage.setMinHeight(600);
-        primaryStage.setResizable(false);
-        primaryStage.show();
+        ViewHandler.initialize(primaryStage);
+        ViewHandler.getInstance().openView(ViewType.LOGIN);
     }
     
     public static void main(String[] args) {
