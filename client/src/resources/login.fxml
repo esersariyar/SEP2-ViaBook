@@ -3,7 +3,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="LoginController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="view.LoginController">
     <children>
         <VBox alignment="CENTER" spacing="18" styleClass="anchor-pane" fillWidth="true" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" maxWidth="400" layoutX="0" layoutY="0">
             <children>
