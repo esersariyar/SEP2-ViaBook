@@ -26,11 +26,11 @@ public class TestRunner {
                 .selectors(selectClass(testClass))
                 .build();
             launcher.execute(request, listener);
-            System.out.println("✅ " + className + " completed");
+            System.out.println("[OK] " + className + " completed");
         } catch (ClassNotFoundException e) {
-            System.out.println("❌ " + className + " not found: " + e.getMessage());
+            System.out.println("[ERROR] " + className + " not found: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("❌ Error running " + className + ": " + e.getMessage());
+            System.out.println("[ERROR] Error running " + className + ": " + e.getMessage());
         }
     }
     private static void printTestSummary(TestExecutionSummary summary) {
@@ -51,9 +51,9 @@ public class TestRunner {
             });
         }
         if (summary.getTestsSucceededCount() == summary.getTestsFoundCount()) {
-            System.out.println("\n\ud83c\udf89 All tests passed successfully!");
+            System.out.println("\n[SUCCESS] All tests passed successfully!");
         } else {
-            System.out.println("\n\u26a0\ufe0f  Some tests failed. Please check the output above.");
+            System.out.println("\n[WARNING] Some tests failed. Please check the output above.");
         }
     }
 } 
